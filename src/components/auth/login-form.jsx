@@ -43,12 +43,12 @@ export default function LoginForm({
             transition={{ delay: 0.6 }}
           >
             <label className="block text-sm font-medium text-dark mb-2">
-              Username
+              Mobile No
             </label>
             <motion.input
               ref={emailInputRef}
               type="text"
-              placeholder="Enter your username"
+              placeholder="Enter your Mobile No"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl bg-white/10 border border-dark text-dark placeholder-dark focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 transition-all duration-300"

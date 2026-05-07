@@ -67,13 +67,13 @@ export default function ForgotPassword() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-1">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Mobile No</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="username"
                   name="username"
-                  placeholder="Your username"
+                  placeholder="Your Mobile No"
                   value={form.username}
                   onChange={handleChange}
                   className="pl-9"
