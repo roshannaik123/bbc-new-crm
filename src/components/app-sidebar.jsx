@@ -39,6 +39,7 @@ import {
   UserSearch,
   ClipboardListIcon,
   BarChart3,
+  Award,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FaUserClock } from "react-icons/fa";
@@ -120,32 +121,6 @@ const NAVIGATION_CONFIG = {
         },
       ],
     },
-
-    LEAD: {
-      title: "Lead",
-      url: "/lead",
-      icon: ClipboardList,
-    },
-    ONETOONE: {
-      title: "One To One",
-      url: "/one-to-one",
-      icon: FaUserClock,
-    },
-    TEAM: {
-      title: "Team",
-      url: "/team",
-      icon: Users2,
-    },
-    VISITOR_GUEST: {
-      title: "Visitor/Guest",
-      url: "/visitor-guest",
-      icon: UserSearch,
-    },
-    BONUS_POINT: {
-      title: "Bonus Point",
-      url: "/bonus-point",
-      icon: Badge,
-    },
     FEEDBACK: {
       title: "Feedback",
       url: "/feedback",
@@ -161,10 +136,37 @@ const NAVIGATION_CONFIG = {
       url: "/share-user",
       icon: Share2,
     },
-    DOWNLOAD: {
-      title: "Download",
-      url: "/download",
-      icon: Download,
+    POINTS: {
+      title: "Points",
+      url: "#2",
+      icon: Award,
+      items: [
+        {
+          title: "Lead",
+          url: "/lead",
+          icon: ClipboardList,
+        },
+        {
+          title: "One To One",
+          url: "/one-to-one",
+          icon: FaUserClock,
+        },
+        {
+          title: "Team",
+          url: "/team",
+          icon: Users2,
+        },
+        {
+          title: "Visitor/Guest",
+          url: "/visitor-guest",
+          icon: UserSearch,
+        },
+        {
+          title: "Bonus Point",
+          url: "/bonus-point",
+          icon: Badge,
+        },
+      ],
     },
     REPORT: {
       title: "Report",
@@ -176,26 +178,11 @@ const NAVIGATION_CONFIG = {
           url: "/report/attendence-report",
           icon: ClipboardListIcon,
         },
-        // {
-        //   title: "Component Stock",
-        //   url: "/report/componentstock",
-        //   icon: Boxes,
-        // },
-        // {
-        //   title: "Purchase Product",
-        //   url: "/report/purchaseproduct",
-        //   icon: FileDown,
-        // },
-        // {
-        //   title: "Purchase Component",
-        //   url: "/report/purchasecomponent",
-        //   icon: FileDown,
-        // },
-        // {
-        //   title: "Order",
-        //   url: "/report/order",
-        //   icon: ClipboardList,
-        // },
+        {
+          title: "Download",
+          url: "/download",
+          icon: Download,
+        },
       ],
     },
     SETTINGS: {
@@ -218,15 +205,10 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       "USERS",
       "MEETINGS",
-      // "LEAD",
-      "ONETOONE",
-      "TEAM",
-      "VISITOR_GUEST",
-      "BONUS_POINT",
+      "POINTS",
       // "FEEDBACK",
       // "CONTACT",
       "SHARE_USER",
-      "DOWNLOAD",
       "REPORT",
       "SETTINGS",
     ],
@@ -239,15 +221,10 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       "USERS",
       "MEETINGS",
-      // "LEAD",
-      "ONETOONE",
-      "TEAM",
-      "VISITOR_GUEST",
-      "BONUS_POINT",
+      "POINTS",
       // "FEEDBACK",
       // "CONTACT",
       "SHARE_USER",
-      "DOWNLOAD",
       "REPORT",
       "SETTINGS",
     ],
@@ -264,15 +241,10 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       "USERS",
       "MEETINGS",
-      "LEAD",
-      "ONETOONE",
-      "TEAM",
-      "VISITOR_GUEST",
-      "BONUS_POINT",
+      "POINTS",
       "FEEDBACK",
       "CONTACT",
       "SHARE_USER",
-      "DOWNLOAD",
       "REPORT",
       "SETTINGS",
     ],
@@ -285,15 +257,10 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       "USERS",
       "MEETINGS",
-      "TEAM",
-      "VISITOR_GUEST",
-      "BONUS_POINT",
-      "LEAD",
-      "ONETOONE",
+      "POINTS",
       "FEEDBACK",
       "CONTACT",
       "SHARE_USER",
-      "DOWNLOAD",
       "REPORT",
       "SETTINGS",
     ],
@@ -310,15 +277,9 @@ const USER_ROLE_PERMISSIONS = {
       // "ENQUIRY",
       // "USERS",
       // "MEETINGS",
-      // "LEAD",
-      // "ONETOONE",
-      // "TEAM",
-      // "VISITOR_GUEST",
-      // "BONUS_POINT",
       // "FEEDBACK",
       // "CONTACT",
       // "SHARE_USER",
-      // "DOWNLOAD",
       // "REPORT",
       "SETTINGS",
     ],
@@ -331,15 +292,9 @@ const USER_ROLE_PERMISSIONS = {
       // "ENQUIRY",
       // "USERS",
       // "MEETINGS",
-      // "LEAD",
-      // "ONETOONE",
-      // "TEAM",
-      // "VISITOR_GUEST",
-      // "BONUS_POINT",
       // "FEEDBACK",
       // "CONTACT",
       // "SHARE_USER",
-      // "DOWNLOAD",
       // "REPORT",
       "SETTINGS",
     ],
@@ -356,15 +311,9 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       // "USERS",
       // "MEETINGS",
-      // "LEAD",
-      // "ONETOONE",
-      // "TEAM",
-      // "VISITOR_GUEST",
-      // "BONUS_POINT",
       // "FEEDBACK",
       // "CONTACT",
       // "SHARE_USER",
-      // "DOWNLOAD",
       // "REPORT",
       "SETTINGS",
     ],
@@ -377,15 +326,9 @@ const USER_ROLE_PERMISSIONS = {
       "ENQUIRY",
       // "USERS",
       // "MEETINGS",
-      // "LEAD",
-      // "ONETOONE",
-      // "TEAM",
-      // "VISITOR_GUEST",
-      // "BONUS_POINT",
       // "FEEDBACK",
       // "CONTACT",
       // "SHARE_USER",
-      // "DOWNLOAD",
       // "REPORT",
       "SETTINGS",
     ],
@@ -412,18 +355,29 @@ const ADMIN_TYPE_MAP = {
   usertype1: 4,
 };
 
-const useNavigationData = (userTypeKey) => {
+const useNavigationData = (user) => {
   return useMemo(() => {
+    let userTypeKey = 1;
+
+    // 🔥 FIXED LOGIC
+    if (user?.admin_type === "user") {
+      userTypeKey = Number(user?.details_view) === 1 ? 4 : 3;
+    } else {
+      userTypeKey = ADMIN_TYPE_MAP[user?.admin_type] || 1;
+    }
+
     const permissions =
       USER_ROLE_PERMISSIONS[userTypeKey] || USER_ROLE_PERMISSIONS[1];
 
     const buildNavItems = (permissionKeys, config) => {
       if (!permissionKeys) return [];
+
       return permissionKeys
         .map((key) => {
           if (key === "MASTER_SETTINGS_LIMITED") {
             return LIMITED_MASTER_SETTINGS;
           }
+
           return config[key];
         })
         .filter(Boolean);
@@ -437,8 +391,11 @@ const useNavigationData = (userTypeKey) => {
       ...NAVIGATION_CONFIG.COMMON,
     });
 
-    return { navMain, navMainReport };
-  }, [userTypeKey]);
+    return {
+      navMain,
+      navMainReport,
+    };
+  }, [user]);
 };
 
 const Logo = ({ className }) => (
@@ -453,38 +410,48 @@ const TEAMS_CONFIG = [
 
 export function AppSidebar({ ...props }) {
   const [openItem, setOpenItem] = useState(null);
+
   const user = useSelector((state) => state.auth.user);
-  const userTypeKey = ADMIN_TYPE_MAP[user?.admin_type] || 1;
-  const { navMain, navMainReport } = useNavigationData(userTypeKey);
+
+  // 🔥 UPDATED
+  const { navMain, navMainReport } = useNavigationData(user);
+
   const initialData = {
     user: {
       name: user?.name || "User",
       email: user?.email || "user@example.com",
     },
+
     teams: TEAMS_CONFIG,
+
     navMain,
     navMainReport,
   };
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={initialData.teams} />
       </SidebarHeader>
+
       <SidebarContent className="sidebar-content">
         <NavMain
           items={initialData.navMain}
           openItem={openItem}
           setOpenItem={setOpenItem}
         />
+
         {/* <NavMainReport
           items={initialData.navMainReport}
           openItem={openItem}
           setOpenItem={setOpenItem}
         /> */}
       </SidebarContent>
+
       <SidebarFooter>
         <NavUser user={initialData.user} />
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
