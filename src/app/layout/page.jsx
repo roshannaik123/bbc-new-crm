@@ -19,9 +19,7 @@ export default function Page({ children }) {
   };
   return (
     <SidebarProvider>
-      <div className="hidden md:block">
-        <AppSidebar />
-      </div>
+      <AppSidebar variant="inset" />
 
       <SidebarInset className="min-w-0 flex flex-col min-h-screen">
         <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 w-full overflow-hidden">

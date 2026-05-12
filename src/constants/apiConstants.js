@@ -103,6 +103,12 @@ export const DOWNLOAD_API = {
   member: "/download-member-report",
   mobileUser: "/download-mobile-user-report",
 };
+export const DASHBOARD_API = {
+  list:"/panel-dashboard",
+};
+export const ACTIVITY_API = {
+  list:"panel-fetch-activity",
+};
 
 export const USER_API = {
   new: "/panel-fetch-new-profile",

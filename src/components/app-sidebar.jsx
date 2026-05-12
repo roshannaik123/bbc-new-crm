@@ -40,6 +40,7 @@ import {
   ClipboardListIcon,
   BarChart3,
   Award,
+  Activity,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FaUserClock } from "react-icons/fa";
@@ -61,6 +62,11 @@ const NAVIGATION_CONFIG = {
       title: "About Us",
       url: "/about-us",
       icon: Info,
+    },
+    ACTIVITY: {
+      title: "Activity",
+      url: "/activity",
+      icon: Activity,
     },
     MISSION_AND_VISSION: {
       title: "Mission & Vission",
@@ -200,6 +206,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",
@@ -216,6 +223,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",
@@ -236,6 +244,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",
@@ -252,6 +261,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",
@@ -306,6 +316,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",
@@ -321,6 +332,7 @@ const USER_ROLE_PERMISSIONS = {
       "DASHBOARD",
       "PROFILE",
       "ABOUT_US",
+      "ACTIVITY",
       "MISSION_AND_VISSION",
       "PORTFOLIO",
       "ENQUIRY",

@@ -33,6 +33,7 @@ import ShareUserById from "@/app/shareuser/ShareUserById";
 import Download from "@/app/download/Download";
 import BonusPoint from "@/app/bonus-point/BonusPoint";
 import AttendenceReport from "@/app/report/AttendenceReport";
+import Activity from "@/app/activity/Activity";
 
 function AppRoutes() {
   return (
@@ -73,6 +74,14 @@ function AppRoutes() {
             element={
               <Suspense fallback={<LoadingBar />}>
                 <AboutUs />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/activity"
+            element={
+              <Suspense fallback={<LoadingBar />}>
+                <Activity />
               </Suspense>
             }
           />
