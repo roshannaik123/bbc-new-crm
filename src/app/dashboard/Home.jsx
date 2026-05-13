@@ -36,10 +36,12 @@ function Home() {
 
   const [dashboard, setDashboard] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [error, setError] = useState(null);
 
   const loadDashboard = async () => {
     try {
       setIsFetching(true);
+      setError(null);
 
       const res = await fetchDashboard({
         url: DASHBOARD_API.list,
@@ -47,8 +49,12 @@ function Home() {
       });
 
       setDashboard(res);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err.message ||
+          "Failed to load dashboard data",
+      );
     } finally {
       setIsFetching(false);
     }
@@ -58,7 +64,7 @@ function Home() {
     loadDashboard();
   }, []);
 
-  /* ---------------- LOADER UI ---------------- */
+  /* ---------------- LOADER ---------------- */
   if (isFetching) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -67,6 +73,27 @@ function Home() {
     );
   }
 
+  /* ---------------- ERROR UI ---------------- */
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen text-center px-4">
+        <h2 className="text-xl font-bold text-red-500">
+          Failed to load dashboard
+        </h2>
+
+        <p className="text-gray-600 mt-2">{error}</p>
+
+        <button
+          onClick={loadDashboard}
+          className="mt-4 px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  /* ---------------- MAIN UI ---------------- */
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       {/* HEADER */}
