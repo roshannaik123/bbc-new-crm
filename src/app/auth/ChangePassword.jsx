@@ -31,10 +31,10 @@ const ChangePassword = ({ open, setOpen }) => {
   });
 
   useEffect(() => {
-    if (user?.name) {
+    if (user?.mobile) {
       setFormData((prev) => ({
         ...prev,
-        username: user.name,
+        username: user.mobile,
       }));
     }
   }, [user]);
@@ -52,8 +52,6 @@ const ChangePassword = ({ open, setOpen }) => {
       return;
     }
 
-
-
     try {
       const res = await trigger({
         url: CHANGE_PASSWORD_API.create,
@@ -65,8 +63,8 @@ const ChangePassword = ({ open, setOpen }) => {
         },
       });
 
-      if (res?.code === 201) {
-        toast.success(res?.message || "Password updated successfully");
+      if (res?.code == 200) {
+        toast.success(res?.msg || "Password updated successfully");
         setFormData((prev) => ({
           ...prev,
           oldPassword: "",
@@ -74,10 +72,10 @@ const ChangePassword = ({ open, setOpen }) => {
         }));
         setOpen(false);
       } else {
-        toast.error(res?.message || "Failed to update password");
+        toast.error(res?.msg || "Failed to update password");
       }
     } catch (error) {
-      toast.error(error?.message || "Something went wrong");
+      toast.error(error?.msg || "Something went wrong");
     }
   };
 

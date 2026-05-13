@@ -40,11 +40,11 @@ export default function ForgotPassword() {
         data: form,
       });
 
-      if (res?.code === 201) {
-        toast.success(res.message || "Reset link sent successfully");
+      if (res?.code == 200) {
+        toast.success(res.msg || "Reset link sent successfully");
         setForm({ username: "", email: "" });
       } else {
-        toast.error(res?.message || "Something went wrong");
+        toast.error(res?.msg || "Something went wrong");
       }
     } catch (error) {
       toast.error(error?.message || "Something went wrong");

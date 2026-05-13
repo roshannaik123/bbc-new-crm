@@ -79,7 +79,7 @@ export function NavUser({ user }) {
                 <div className="flex justify-between items-center h-full w-full text-xs leading-tight text-center">
                   <span className="flex items-center gap-1 font-semibold"></span>
                   <span className="flex items-center gap-1 font-semibold">
-                    Updated on :18/03/2026
+                    Updated on :13/05/2026
                   </span>
                 </div>
               </div>
