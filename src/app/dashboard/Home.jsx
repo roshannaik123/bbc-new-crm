@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { DASHBOARD_API } from "@/constants/apiConstants";
 import Loader from "@/components/loader/loader";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Users,
   UserX,
@@ -10,6 +12,7 @@ import {
   Calendar,
   Handshake,
   Eye,
+  RefreshCw,
 } from "lucide-react";
 
 /* ---------------- CARD ---------------- */
@@ -73,88 +76,98 @@ function Home() {
     );
   }
 
-  /* ---------------- ERROR UI ---------------- */
-  if (error) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen text-center px-4">
-        <h2 className="text-xl font-bold text-red-500">
-          Failed to load dashboard
-        </h2>
-
-        <p className="text-gray-600 mt-2">{error}</p>
-
-        <button
-          onClick={loadDashboard}
-          className="mt-4 px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
-
   /* ---------------- MAIN UI ---------------- */
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard Overview</h1>
-        <p className="text-gray-500 text-sm">
-          Welcome back 👋 Here’s your business summary
-        </p>
-      </div>
+    <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6">
+      <Card className="max-w-8xl mx-auto shadow-lg border-t-4 border-t-primary bg-white">
+        <CardContent>
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b py-5">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-semibold text-primary uppercase">
+                Dashboard Overview
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Welcome back 👋 Here’s your business summary
+              </p>
+            </div>
 
-      {/* STATS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <StatCard
-          title="Active Members"
-          value={dashboard?.total_active}
-          icon={Users}
-          color="bg-green-500"
-        />
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto"
+              onClick={loadDashboard}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
 
-        <StatCard
-          title="Inactive Members"
-          value={dashboard?.total_inactive}
-          icon={UserX}
-          color="bg-red-500"
-        />
+          {/* ERROR UI */}
+          {error ? (
+            <div className="flex flex-col justify-center items-center py-20 text-center px-4">
+              <h2 className="text-xl font-bold text-red-500">
+                Failed to load dashboard
+              </h2>
+              <p className="text-gray-600 mt-2 mb-6">{error}</p>
+              <Button onClick={loadDashboard} className="bg-primary text-white">
+                Retry
+              </Button>
+            </div>
+          ) : (
+            /* STATS GRID */
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-8">
+              <StatCard
+                title="Active Members"
+                value={dashboard?.total_active}
+                icon={Users}
+                color="bg-green-500"
+              />
 
-        <StatCard
-          title="Total Amount"
-          value={dashboard?.total_amount}
-          icon={IndianRupee}
-          color="bg-purple-500"
-        />
+              <StatCard
+                title="Inactive Members"
+                value={dashboard?.total_inactive}
+                icon={UserX}
+                color="bg-red-500"
+              />
 
-        <StatCard
-          title="Total Leads"
-          value={dashboard?.total_leads}
-          icon={TrendingUp}
-          color="bg-blue-500"
-        />
+              <StatCard
+                title="Leads Exchange"
+                value={dashboard?.total_amount}
+                icon={IndianRupee}
+                color="bg-purple-500"
+              />
 
-        <StatCard
-          title="Meetings"
-          value={dashboard?.total_meeting}
-          icon={Calendar}
-          color="bg-yellow-500"
-        />
+              <StatCard
+                title="Total Leads"
+                value={dashboard?.total_leads}
+                icon={TrendingUp}
+                color="bg-blue-500"
+              />
 
-        <StatCard
-          title="One to One"
-          value={dashboard?.total_onetoone}
-          icon={Handshake}
-          color="bg-indigo-500"
-        />
+              <StatCard
+                title="Meetings"
+                value={dashboard?.total_meeting}
+                icon={Calendar}
+                color="bg-yellow-500"
+              />
 
-        <StatCard
-          title="Visitors"
-          value={dashboard?.total_visitor}
-          icon={Eye}
-          color="bg-pink-500"
-        />
-      </div>
+              <StatCard
+                title="One to One"
+                value={dashboard?.total_onetoone}
+                icon={Handshake}
+                color="bg-indigo-500"
+              />
+
+              <StatCard
+                title="Visitors"
+                value={dashboard?.total_visitor}
+                icon={Eye}
+                color="bg-pink-500"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

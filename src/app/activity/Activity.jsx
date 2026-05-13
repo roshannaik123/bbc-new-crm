@@ -9,7 +9,16 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { ACTIVITY_API } from "@/constants/apiConstants";
 import Loader from "@/components/loader/loader";
 
-import { User, Phone, Users, Tag, Calendar, Award, Star } from "lucide-react";
+import {
+  User,
+  Phone,
+  Users,
+  Tag,
+  Calendar,
+  Award,
+  Star,
+  Mail,
+} from "lucide-react";
 
 const COLORS = ["#4F46E5", "#22C55E"];
 
@@ -108,14 +117,19 @@ const Activity = () => {
                 const a = item?.attendance || item;
                 console.log(item);
 
+                const attended = Number(a?.attendance_count || 0);
+                const total = Number(a?.total_meeting || 0);
+                const attendancePercentage =
+                  total > 0 ? Math.round((attended / total) * 100) : 0;
+
                 const pieData = [
                   {
                     name: "Attendance",
-                    value: a?.attendance_count || 0,
+                    value: attendancePercentage,
                   },
                   {
                     name: "Remaining",
-                    value: 100 - (a?.attendance_count || 0),
+                    value: 100 - attendancePercentage,
                   },
                 ];
 
@@ -140,7 +154,7 @@ const Activity = () => {
                                 : "https://via.placeholder.com/200"
                             }
                             alt="user"
-                            className="w-24 h-24 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl object-contain bg-white border-2 sm:border-4 border-indigo-100 shadow"
+                            className="w-24 h-24 sm:w-36 sm:h-36 lg:w-44 lg:h-44 rounded-2xl object-contain bg-white border-2 sm:border-1 border-indigo-100 shadow"
                           />
 
                           <div>
@@ -153,6 +167,11 @@ const Activity = () => {
                               <p className="flex items-center gap-2">
                                 <Phone size={16} />
                                 {a?.mobile}
+                              </p>
+
+                              <p className="flex items-center gap-2 truncate max-w-[200px] sm:max-w-xs">
+                                <Mail size={16} />
+                                {a?.email || "No Email"}
                               </p>
 
                               <p className="flex items-center gap-2">
@@ -177,7 +196,7 @@ const Activity = () => {
                         </div>
 
                         {/* STATS GRID */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6 sm:mt-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8">
                           <Stat
                             label="One to One"
                             value={a?.onetoone_count}
@@ -189,6 +208,11 @@ const Activity = () => {
                             color="bg-pink-500"
                           />
                           <Stat
+                            label="Visitor"
+                            value={a?.visitor_count}
+                            color="bg-cyan-500"
+                          />
+                          <Stat
                             label="Ref Given"
                             value={a?.ref_given}
                             color="bg-green-500"
@@ -197,21 +221,6 @@ const Activity = () => {
                             label="Ref Received"
                             value={a?.ref_received}
                             color="bg-red-500"
-                          />
-                          <Stat
-                            label="Visitor"
-                            value={a?.visitor_count}
-                            color="bg-cyan-500"
-                          />
-                          <Stat
-                            label="Bonus"
-                            value={a?.bonus_point}
-                            color="bg-yellow-500"
-                          />
-                          <Stat
-                            label="Chief Guest"
-                            value={a?.chief_guest_count}
-                            color="bg-orange-500"
                           />
                         </div>
                       </div>
@@ -240,11 +249,11 @@ const Activity = () => {
                         </div>
 
                         <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600 mt-2">
-                          {a?.attendance_count || 0}%
+                          {attendancePercentage}%
                         </h3>
 
                         <p className="text-gray-500 text-sm">
-                          Attendance Score
+                          Attendance ({attended}/{total})
                         </p>
 
                         {/* BONUS */}
