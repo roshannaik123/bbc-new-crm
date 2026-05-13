@@ -107,7 +107,7 @@ export const DASHBOARD_API = {
   list:"/panel-dashboard",
 };
 export const ACTIVITY_API = {
-  list:"panel-fetch-activity",
+  list:"/panel-fetch-activity",
 };
 
 export const USER_API = {
