@@ -15,14 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { MEETING_API, MEMBER_API, GUEST_API } from "@/constants/apiConstants";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useGetApiMutation } from "@/hooks/useGetApiMutation";
@@ -37,11 +29,8 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
   const [step, setStep] = useState("attendance"); // "attendance" or "visitors"
   const [filterType, setFilterType] = useState("all"); // "all", "checked", "unchecked"
-
-  const ITEMS_PER_PAGE = 10;
 
   const createInitialVisitorRow = () => ({
     guest_date: format(new Date(), "yyyy-MM-dd"),
@@ -90,14 +79,12 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
       setSelectedMembers(preSelected);
       setStep("attendance");
       setVisitorRows([createInitialVisitorRow()]);
-      setCurrentPage(1);
     } else if (!open) {
       setSelectedMembers([]);
       setSearchTerm("");
       setFilterType("all");
       setStep("attendance");
       setVisitorRows([createInitialVisitorRow()]);
-      setCurrentPage(1);
     }
   }, [open, members.length, meetingRes]);
 
@@ -113,7 +100,9 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
   };
 
   const filteredMembers = members.filter((m) => {
-    const matchesSearch = (m.name || "").toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (m.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const isChecked = selectedMembers.some((sm) => sm.id === m.id);
     if (filterType === "checked") {
       return matchesSearch && isChecked;
@@ -137,43 +126,13 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
       });
     } else {
       setSelectedMembers((prev) =>
-        prev.filter((m) => !filteredMembers.some((fm) => fm.id === m.id))
+        prev.filter((m) => !filteredMembers.some((fm) => fm.id === m.id)),
       );
     }
   };
 
-  const totalPages = Math.ceil(filteredMembers.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginatedMembers = filteredMembers.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE,
-  );
-
-  const getPageNumbers = () => {
-    const pages = [];
-    if (totalPages <= 5) {
-      for (let i = 1; i <= totalPages; i++) pages.push(i);
-    } else {
-      pages.push(1);
-      if (currentPage > 3) {
-        pages.push("ellipsis-1");
-      }
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) {
-        if (!pages.includes(i)) pages.push(i);
-      }
-      if (currentPage < totalPages - 2) {
-        pages.push("ellipsis-2");
-      }
-      if (!pages.includes(totalPages)) pages.push(totalPages);
-    }
-    return pages;
-  };
-
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1);
   };
 
   const handleAddVisitorRow = () => {
@@ -214,7 +173,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
         );
         queryClient.invalidateQueries(["active-meetings"]);
         queryClient.invalidateQueries(["inactive-meetings"]);
-        
+
         if (shouldAddVisitor) {
           setStep("visitors");
         } else {
@@ -263,18 +222,15 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
 
   const isAllSelected =
     filteredMembers.length > 0 &&
-    filteredMembers.every((fm) => selectedMembers.some((sm) => sm.id === fm.id));
+    filteredMembers.every((fm) =>
+      selectedMembers.some((sm) => sm.id === fm.id),
+    );
   const isLoading = membersLoading || meetingLoading;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className={cn(
-          "transition-all duration-300",
-          step === "attendance"
-            ? "w-[95vw] sm:w-full max-w-md"
-            : "w-[95vw] md:w-full max-w-4xl max-h-[90vh] flex flex-col p-4 md:p-6",
-        )}
+        className="w-full max-w-full md:w-[90vw] md:max-w-[90vw] max-h-[98vh] md:max-h-[90vh] overflow-y-auto rounded-none md:rounded-lg flex flex-col p-4 md:p-6 transition-all duration-300"
         aria-describedby={undefined}
       >
         {step === "attendance" ? (
@@ -305,7 +261,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 <div className="flex gap-1.5 p-1 bg-gray-100/80 rounded-lg border border-gray-200/50">
                   <button
                     type="button"
-                    onClick={() => { setFilterType("all"); setCurrentPage(1); }}
+                    onClick={() => setFilterType("all")}
                     className={cn(
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "all"
@@ -317,7 +273,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setFilterType("checked"); setCurrentPage(1); }}
+                    onClick={() => setFilterType("checked")}
                     className={cn(
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "checked"
@@ -329,7 +285,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setFilterType("unchecked"); setCurrentPage(1); }}
+                    onClick={() => setFilterType("unchecked")}
                     className={cn(
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "unchecked"
@@ -367,7 +323,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                         No members found matching "{searchTerm}"
                       </div>
                     ) : (
-                      paginatedMembers.map((member) => {
+                      filteredMembers.map((member) => {
                         const isChecked = selectedMembers.some(
                           (m) => m.id === member.id,
                         );
@@ -398,78 +354,15 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                     )}
                   </div>
                 </div>
-
-                {/* Pagination Controls */}
-                {totalPages > 1 && (
-                  <div className="pt-2 border-t border-gray-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs text-gray-500 font-medium text-center sm:text-left">
-                      Showing {startIndex + 1}-
-                      {Math.min(startIndex + ITEMS_PER_PAGE, filteredMembers.length)}{" "}
-                      of {filteredMembers.length}
-                    </span>
-                    <Pagination className="w-auto mx-0 justify-center">
-                      <PaginationContent>
-                        <PaginationItem>
-                          <PaginationPrevious
-                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className={
-                              currentPage === 1
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-
-                        {getPageNumbers().map((page, idx) => {
-                          if (
-                            page === "ellipsis-1" ||
-                            page === "ellipsis-2"
-                          ) {
-                            return (
-                              <PaginationItem key={`ellipsis-${idx}`}>
-                                <span className="px-2 text-gray-400">...</span>
-                              </PaginationItem>
-                            );
-                          }
-                          return (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                isActive={page === currentPage}
-                                onClick={() => setCurrentPage(page)}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          );
-                        })}
-
-                        <PaginationItem>
-                          <PaginationNext
-                            onClick={() =>
-                              setCurrentPage((p) => Math.min(totalPages, p + 1))
-                            }
-                            disabled={currentPage === totalPages}
-                            className={
-                              currentPage === totalPages
-                                ? "pointer-events-none opacity-50"
-                                : "cursor-pointer"
-                            }
-                          />
-                        </PaginationItem>
-                      </PaginationContent>
-                    </Pagination>
-                  </div>
-                )}
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t w-full">
               <Button
                 variant="outline"
                 onClick={onClose}
                 disabled={saveLoading}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
@@ -479,6 +372,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 disabled={
                   saveLoading || isLoading || selectedMembers.length === 0
                 }
+                className="w-full sm:w-auto"
               >
                 {saveLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Attendance
@@ -488,6 +382,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 disabled={
                   saveLoading || isLoading || selectedMembers.length === 0
                 }
+                className="w-full sm:w-auto"
               >
                 {saveLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Attendance & Add Visitor
@@ -561,7 +456,9 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="Visitor">Visitor</SelectItem>
-                          <SelectItem value="Chief Guest">Chief Guest</SelectItem>
+                          <SelectItem value="Chief Guest">
+                            Chief Guest
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -648,7 +545,11 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                   >
                     Skip / Close
                   </Button>
-                  <Button type="submit" disabled={saveGuestLoading} className="w-full sm:w-auto">
+                  <Button
+                    type="submit"
+                    disabled={saveGuestLoading}
+                    className="w-full sm:w-auto"
+                  >
                     {saveGuestLoading && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
