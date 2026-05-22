@@ -97,7 +97,7 @@ export default function LoginForm({
               Forgot password?
             </Link>
           </motion.div>
-          <Button className="w-full py-3" type="submit" disabled={isLoading}>
+          <Button className="w-full py-3 bg-[#AA2764]" type="submit" disabled={isLoading}>
             {isLoading ? (
               <motion.span
                 key={loadingMessage}

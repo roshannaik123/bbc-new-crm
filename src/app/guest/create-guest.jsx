@@ -26,6 +26,8 @@ import { format } from "date-fns";
 
 const initialState = {
   guest_date: format(new Date(), "yyyy-MM-dd"),
+  guest_name: "",
+  guest_mobile: "",
   guest_type: "Visitor",
   guest_from_id: "",
   guest_description: "",
@@ -83,6 +85,8 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
         if (data) {
           setFormData({
             guest_date: data.guest_date || format(new Date(), "yyyy-MM-dd"),
+            guest_name: data.guest_name || "",
+            guest_mobile: data.guest_mobile || "",
             guest_type: data.guest_type || "Visitor",
             guest_from_id: (data.guest_from_id || data.guest_from?.id || data.from_id || "").toString(),
             guest_description: data.guest_description || "",
@@ -98,6 +102,10 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.guest_name) {
+      toast.error("Please enter guest name");
+      return;
+    }
     if (!formData.guest_from_id) {
       toast.error("Please select a member");
       return;
@@ -141,6 +149,27 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
               value={formData.guest_date}
               onChange={(e) => setFormData({ ...formData, guest_date: e.target.value })}
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="guest_name">Name <span className="text-red-500">*</span></Label>
+            <Input
+              id="guest_name"
+              placeholder="Guest Name"
+              value={formData.guest_name}
+              onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="guest_mobile">Number</Label>
+            <Input
+              id="guest_mobile"
+              placeholder="Mobile Number"
+              value={formData.guest_mobile}
+              onChange={(e) => setFormData({ ...formData, guest_mobile: e.target.value })}
             />
           </div>
 

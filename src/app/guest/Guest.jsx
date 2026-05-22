@@ -89,6 +89,16 @@ const Guest = () => {
       cell: ({ row }) => format(new Date(row.original.guest_date), "dd-MM-yyyy"),
     },
     {
+      header: "Name",
+      accessorKey: "guest_name",
+      cell: ({ row }) => row.original.guest_name || "-",
+    },
+    {
+      header: "Number",
+      accessorKey: "guest_mobile",
+      cell: ({ row }) => row.original.guest_mobile || "-",
+    },
+    {
       header: "Type",
       accessorKey: "guest_type",
       cell: ({ row }) => (

@@ -120,7 +120,7 @@ export default function AuthUI() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#0F172A] to-[#0F172A] flex items-center justify-center p-4 overflow-hidden relative">
+    <div className="min-h-screen bg-gradient-to-br from-[#AA2764] via-[#792d50] to-[#d04988] flex items-center justify-center p-4 overflow-hidden relative">
       <BackgroundSVG />
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -129,7 +129,7 @@ export default function AuthUI() {
         className="relative z-10 max-w-6xl w-full"
       >
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 rounded-3xl overflow-hidden backdrop-blur-xl bg-white/10 border border-white shadow-2xl">
-          <div className="w-full col-span-3">
+          <div className="w-full bg-white col-span-3">
             <LoginImage />
           </div>
           <LoginForm
