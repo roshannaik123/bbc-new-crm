@@ -69,7 +69,7 @@ export default function LoginImage() {
   return (
     <div
       onMouseMove={handleMouseMove}
-      className="relative w-full h-full flex items-center justify-center bg-[#0F172A] overflow-hidden"
+      className="relative w-full h-full flex items-center justify-center bg-white overflow-hidden"
     >
       <motion.div
         style={{ rotateX, rotateY }}
@@ -79,7 +79,7 @@ export default function LoginImage() {
         <motion.div
           className="absolute -translate-y-15 w-[260px] md:w-[320px] lg:w-[360px]"
           animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           <img src="/img/em2.png" className="w-full h-full object-cover" />
         </motion.div>
@@ -88,7 +88,7 @@ export default function LoginImage() {
         <motion.div
           className="absolute translate-y-17 w-[260px] md:w-[320px] lg:w-[360px]"
           animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
           <img src="/img/em1.png" className="w-full h-full object-cover" />
         </motion.div>
