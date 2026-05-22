@@ -272,8 +272,8 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
         className={cn(
           "transition-all duration-300",
           step === "attendance"
-            ? "max-w-md md:max-w-[90vw]"
-            : "max-w-4xl md:max-w-[90vw] max-h-[90vh] flex flex-col p-6",
+            ? "w-[95vw] sm:w-full max-w-md"
+            : "w-[95vw] md:w-full max-w-4xl max-h-[90vh] flex flex-col p-4 md:p-6",
         )}
         aria-describedby={undefined}
       >
@@ -401,13 +401,13 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
 
                 {/* Pagination Controls */}
                 {totalPages > 1 && (
-                  <div className="pt-2 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-xs text-gray-500 font-medium">
+                  <div className="pt-2 border-t border-gray-100 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs text-gray-500 font-medium text-center sm:text-left">
                       Showing {startIndex + 1}-
                       {Math.min(startIndex + ITEMS_PER_PAGE, filteredMembers.length)}{" "}
                       of {filteredMembers.length}
                     </span>
-                    <Pagination className="w-auto mx-0">
+                    <Pagination className="w-auto mx-0 justify-center">
                       <PaginationContent>
                         <PaginationItem>
                           <PaginationPrevious
@@ -523,7 +523,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 {visitorRows.map((row, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 md:p-1 bg-white border border-gray-100 rounded-lg md:border-none md:bg-transparent md:items-center relative"
+                    className="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 md:p-1 bg-gray-50/50 border border-gray-200/80 rounded-xl md:border-none md:bg-transparent md:items-center relative shadow-sm md:shadow-none"
                   >
                     {/* Date Input */}
                     <div className="col-span-1 md:col-span-3 space-y-1 md:space-y-0">
@@ -632,22 +632,23 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                   type="button"
                   variant="outline"
                   onClick={handleAddVisitorRow}
-                  className="flex items-center justify-center gap-2 border-dashed border-gray-300 text-gray-600 hover:text-primary hover:border-primary transition-colors"
+                  className="flex items-center justify-center gap-2 border-dashed border-gray-300 text-gray-600 hover:text-primary hover:border-primary transition-colors w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4" />
                   Add Row
                 </Button>
 
-                <div className="flex justify-end gap-2">
+                <div className="flex flex-col sm:flex-row justify-end gap-2 w-full sm:w-auto">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={onClose}
                     disabled={saveGuestLoading}
+                    className="w-full sm:w-auto"
                   >
                     Skip / Close
                   </Button>
-                  <Button type="submit" disabled={saveGuestLoading}>
+                  <Button type="submit" disabled={saveGuestLoading} className="w-full sm:w-auto">
                     {saveGuestLoading && (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}

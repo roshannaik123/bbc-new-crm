@@ -232,7 +232,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl" aria-describedby={undefined}>
+      <DialogContent className="w-[95vw] md:w-full max-w-4xl" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>View Attendance Details</DialogTitle>
           <p className="text-sm text-gray-500">
@@ -246,7 +246,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm">
               <div>
                 <span className="font-semibold text-gray-600 block mb-1">
                   Date
