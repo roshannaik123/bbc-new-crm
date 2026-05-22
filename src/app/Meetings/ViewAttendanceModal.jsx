@@ -10,7 +10,15 @@ import { MEETING_API, MEMBER_API } from "@/constants/apiConstants";
 import { useGetApiMutation } from "@/hooks/useGetApiMutation";
 import { Loader2, Search, CheckCircle2, XCircle } from "lucide-react";
 import moment from "moment";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const MemberList = ({
   title,
@@ -19,53 +27,153 @@ const MemberList = ({
   colorClass,
   bgClass,
   borderClass,
-}) => (
-  <div className="flex-1 min-w-[280px] flex flex-col">
-    <div
-      className={`p-3 rounded-t-lg ${bgClass} border ${borderClass} border-b-0 flex items-center justify-between`}
-    >
-      <div className="flex items-center gap-2">
-        <Icon className={`h-5 w-5 ${colorClass}`} />
-        <h3 className={`font-bold text-sm ${colorClass}`}>{title}</h3>
-      </div>
-      <span
-        className={`px-2 py-0.5 rounded-full font-bold text-xs ${bgClass} ${colorClass} border ${borderClass}`}
+}) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [members]);
+
+  const totalPages = Math.ceil(members.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const paginatedMembers = members.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) {
+        pages.push("ellipsis-1");
+      }
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) {
+        if (!pages.includes(i)) pages.push(i);
+      }
+      if (currentPage < totalPages - 2) {
+        pages.push("ellipsis-2");
+      }
+      if (!pages.includes(totalPages)) pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="flex-1 min-w-[280px] flex flex-col">
+      <div
+        className={`p-3 rounded-t-lg ${bgClass} border ${borderClass} border-b-0 flex items-center justify-between`}
       >
-        {members.length}
-      </span>
-    </div>
-    <div
-      className={`border ${borderClass} rounded-b-lg flex-grow flex flex-col overflow-hidden bg-white`}
-    >
-      <div className="overflow-y-auto max-h-[300px] p-2 space-y-1">
-        {members.length === 0 ? (
-          <div className="py-8 text-center text-gray-400 italic text-sm">
-            No members found
-          </div>
-        ) : (
-          members.map((member) => (
-            <div
-              key={member.id}
-              className="p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex items-center gap-3 rounded"
-            >
-              <div
-                className={`w-2 h-2 rounded-full ${bgClass} border ${borderClass}`}
-              />
-              <div className="flex flex-col flex-grow leading-none">
-                <span className="text-sm font-medium text-gray-800 mb-1">
-                  {member.name}
-                </span>
-                <span className="text-[10px] text-gray-400">
-                  {member.mobile}
-                </span>
-              </div>
+        <div className="flex items-center gap-2">
+          <Icon className={`h-5 w-5 ${colorClass}`} />
+          <h3 className={`font-bold text-sm ${colorClass}`}>{title}</h3>
+        </div>
+        <span
+          className={`px-2 py-0.5 rounded-full font-bold text-xs ${bgClass} ${colorClass} border ${borderClass}`}
+        >
+          {members.length}
+        </span>
+      </div>
+      <div
+        className={`border ${borderClass} rounded-b-lg flex-grow flex flex-col overflow-hidden bg-white p-2`}
+      >
+        <div className="space-y-1 min-h-[220px]">
+          {members.length === 0 ? (
+            <div className="py-8 text-center text-gray-400 italic text-sm">
+              No members found
             </div>
-          ))
+          ) : (
+            paginatedMembers.map((member) => (
+              <div
+                key={member.id}
+                className="p-2 border-b border-gray-50 last:border-0 hover:bg-gray-50 flex items-center gap-3 rounded"
+              >
+                <div
+                  className={`w-2 h-2 rounded-full ${bgClass} border ${borderClass}`}
+                />
+                <div className="flex flex-col flex-grow leading-none">
+                  <span className="text-sm font-medium text-gray-800 mb-1">
+                    {member.name}
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    {member.mobile}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Local Pagination */}
+        {totalPages > 1 && (
+          <div className="pt-2 mt-2 border-t border-gray-100 flex items-center justify-between">
+            <span className="text-[10px] text-gray-500 font-medium">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Pagination className="w-auto mx-0">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50 h-7 w-7 p-0"
+                        : "cursor-pointer h-7 w-7 p-0"
+                    }
+                  />
+                </PaginationItem>
+
+                {getPageNumbers().map((page, idx) => {
+                  if (
+                    page === "ellipsis-1" ||
+                    page === "ellipsis-2"
+                  ) {
+                    return (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <span className="px-1 text-gray-400 text-xs">...</span>
+                      </PaginationItem>
+                    );
+                  }
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        isActive={page === currentPage}
+                        onClick={() => setCurrentPage(page)}
+                        className="cursor-pointer h-7 w-7 text-xs"
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage === totalPages}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50 h-7 w-7 p-0"
+                        : "cursor-pointer h-7 w-7 p-0"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         )}
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -124,7 +232,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl" aria-describedby={undefined}>
+      <DialogContent className="w-[95vw] md:w-full max-w-4xl" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>View Attendance Details</DialogTitle>
           <p className="text-sm text-gray-500">
@@ -138,7 +246,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 text-sm">
               <div>
                 <span className="font-semibold text-gray-600 block mb-1">
                   Date
