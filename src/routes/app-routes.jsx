@@ -41,6 +41,7 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<AuthRoute />}>
           <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route
             path="/forgot-password"
             element={
