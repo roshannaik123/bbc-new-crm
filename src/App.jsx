@@ -15,7 +15,6 @@ function App() {
       <Toaster richColors position="top-right" />
       <ScrollToTop />
       <SessionTimeoutTracker expiryTime={time} onLogout={handleLogout} />
-
       <AppRoutes />
     </>
   );

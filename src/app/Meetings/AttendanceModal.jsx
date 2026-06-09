@@ -25,7 +25,12 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const AttendanceModal = ({ open, onClose, meetingId }) => {
+const AttendanceModal = ({ data, open, onClose, meetingId }) => {
+  console.log(data);
+
+  const currentMeeting = data?.find((item) => item.id === Number(meetingId));
+  console.log("attendecn", currentMeeting);
+
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
@@ -101,7 +106,13 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
     });
   };
 
-  const filteredMembers = members.filter((m) => {
+  const meetingGroups =
+    currentMeeting?.meeting_to?.split(",").map((item) => item.trim()) || [];
+
+  const groupMembers = members.filter((member) =>
+    meetingGroups.includes(member.p_type),
+  );
+  const filteredMembers = groupMembers.filter((m) => {
     const matchesSearch = (m.name || "")
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
@@ -247,6 +258,40 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 Select members who attended this meeting
               </p>
             </DialogHeader>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border">
+              <div>
+                <p className="text-xs text-gray-500">Date</p>
+                <p className="font-medium">
+                  {currentMeeting?.meeting_date
+                    ? format(
+                        new Date(currentMeeting.meeting_date),
+                        "dd-MM-yyyy",
+                      )
+                    : "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500">Time</p>
+                <p className="font-medium">
+                  {currentMeeting?.meeting_time || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500">Meeting For</p>
+                <p className="font-medium">
+                  {currentMeeting?.meeting_for || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500">Meeting Group</p>
+                <p className="font-medium">
+                  {currentMeeting?.meeting_to || "-"}
+                </p>
+              </div>
+            </div>
 
             {isLoading ? (
               <div className="flex justify-center p-10">
@@ -272,10 +317,10 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "all"
                         ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30"
+                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30",
                     )}
                   >
-                    All ({members.length})
+                    All ({groupMembers.length})
                   </button>
                   <button
                     type="button"
@@ -284,7 +329,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "checked"
                         ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30"
+                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30",
                     )}
                   >
                     Checked ({selectedMembers.length})
@@ -296,10 +341,10 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                       "flex-1 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer text-center",
                       filterType === "unchecked"
                         ? "bg-white text-gray-900 shadow-sm"
-                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30"
+                        : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30",
                     )}
                   >
-                    Unchecked ({members.length - selectedMembers.length})
+                    Unchecked ({groupMembers.length - selectedMembers.length})
                   </button>
                 </div>
 
@@ -341,7 +386,7 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                               "flex items-center space-x-3 px-3 py-2.5 rounded-lg border transition-all duration-200 cursor-pointer select-none",
                               isChecked
                                 ? "bg-primary/5 border-primary/30 shadow-sm ring-1 ring-primary/20"
-                                : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-sm"
+                                : "bg-white border-gray-200 hover:border-gray-300 hover:bg-gray-50/50 hover:shadow-sm",
                             )}
                           >
                             <Checkbox
@@ -384,7 +429,9 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 }
                 className="w-full sm:w-auto"
               >
-                {saveLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {saveLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Save Attendance
               </Button>
               <Button
@@ -394,7 +441,9 @@ const AttendanceModal = ({ open, onClose, meetingId }) => {
                 }
                 className="w-full sm:w-auto"
               >
-                {saveLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {saveLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 Save Attendance & Add Visitor
               </Button>
             </div>

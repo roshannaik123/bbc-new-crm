@@ -8,17 +8,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MEETING_API } from "@/constants/apiConstants";
+import { MEETING_API, USER_API } from "@/constants/apiConstants";
 import { useApiMutation } from "@/hooks/useApiMutation";
 import { useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, ChevronsUpDownIcon, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { GroupButton } from "@/components/group-button";
+import { Check, ChevronsUpDown } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const initialState = {
   meeting_date: "",
-  meeting_time: "",
+  meeting_time: "07:30",
+  meeting_to: "",
   meeting_for: "",
   meeting_description: "",
   meeting_status: "Active",
@@ -29,7 +37,31 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
   const queryClient = useQueryClient();
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState(initialState);
-  
+  const [pTypes, setPTypes] = useState([]);
+  const [pTypesLoading, setPTypesLoading] = useState(false);
+
+  const { trigger: updateStatus } = useApiMutation();
+  const fetchPTypes = async () => {
+    try {
+      setPTypesLoading(true);
+      const res = await updateStatus({
+        url: USER_API.fetchPType,
+        method: "get",
+      });
+      const data = res?.data || res || [];
+      console.log(data);
+      setPTypes(data);
+    } catch (error) {
+      toast.error("Failed to fetch group types");
+    } finally {
+      setPTypesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPTypes();
+  }, []);
+
   // For fetching existing data
   const { trigger: fetchMeeting } = useApiMutation();
   // For saving data
@@ -42,7 +74,7 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
       setErrors({});
       return;
     }
-    
+
     const fetchData = async () => {
       try {
         const res = await fetchMeeting({
@@ -53,6 +85,7 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
           meeting_date: data.meeting_date || "",
           meeting_time: data.meeting_time || "",
           meeting_for: data.meeting_for || "",
+          meeting_to: data.meeting_to || "",
           meeting_description: data.meeting_description || "",
           meeting_status: data.meeting_status || "Active",
         });
@@ -90,7 +123,11 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
       });
 
       if (res?.code === 200 || res?.success || res?.status === 200) {
-        toast.success(res.message || res.msg || `Meeting ${isEdit ? "updated" : "created"} successfully`);
+        toast.success(
+          res.message ||
+            res.msg ||
+            `Meeting ${isEdit ? "updated" : "created"} successfully`,
+        );
         queryClient.invalidateQueries(["active-meetings"]);
         queryClient.invalidateQueries(["inactive-meetings"]);
         onClose();
@@ -98,7 +135,8 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
         toast.error(res?.message || res?.msg || "Failed to save meeting");
       }
     } catch (error) {
-      const errorMsg = error?.response?.data?.message || error?.response?.data?.msg;
+      const errorMsg =
+        error?.response?.data?.message || error?.response?.data?.msg;
       toast.error(errorMsg || "Something went wrong");
     }
   };
@@ -114,8 +152,8 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="col-span-1 md:col-span-2">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+          {/* <div className="col-span-1 md:col-span-2">
             <Label>Meeting For *</Label>
             <Input
               name="meeting_for"
@@ -126,6 +164,72 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
             {errors.meeting_for && (
               <p className="text-sm text-red-500">{errors.meeting_for}</p>
             )}
+          </div> */}
+          <div>
+            <Label>Meeting For *</Label>
+            <Input
+              name="meeting_for"
+              placeholder="e.g. Project Discussion"
+              value={formData.meeting_for}
+              onChange={handleChange}
+            />
+            {errors.meeting_for && (
+              <p className="text-sm text-red-500">{errors.meeting_for}</p>
+            )}
+          </div>
+
+          <div>
+            <Label>Meeting Type</Label>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {formData.meeting_to || "Select Meeting Types"}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+
+              <PopoverContent className="w-[300px] p-3">
+                <div className="space-y-3">
+                  {pTypes.map((type) => {
+                    const selectedValues = formData.meeting_to
+                      ? formData.meeting_to.split(",")
+                      : [];
+
+                    const checked = selectedValues.includes(type.p_type);
+
+                    return (
+                      <div
+                        key={type.id}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(value) => {
+                            let updatedValues = [...selectedValues];
+
+                            if (value) {
+                              updatedValues.push(type.p_type);
+                            } else {
+                              updatedValues = updatedValues.filter(
+                                (v) => v !== type.p_type,
+                              );
+                            }
+
+                            setFormData((prev) => ({
+                              ...prev,
+                              meeting_to: updatedValues.join(","),
+                            }));
+                          }}
+                        />
+
+                        <span className="text-sm">{type.p_type}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div>

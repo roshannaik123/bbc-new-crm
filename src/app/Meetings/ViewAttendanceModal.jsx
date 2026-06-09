@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { MEETING_API, MEMBER_API } from "@/constants/apiConstants";
+import { MEETING_API, MEMBER_API, USER_API } from "@/constants/apiConstants";
 import { useGetApiMutation } from "@/hooks/useGetApiMutation";
 import { Loader2, Search, CheckCircle2, XCircle } from "lucide-react";
 import moment from "moment";
@@ -19,7 +19,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useApiMutation } from "@/hooks/useApiMutation";
 const MemberList = ({
   title,
   members,
@@ -29,6 +31,7 @@ const MemberList = ({
   borderClass,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
+
   const ITEMS_PER_PAGE = 5;
 
   useEffect(() => {
@@ -82,7 +85,9 @@ const MemberList = ({
       <div
         className={`border ${borderClass} rounded-b-lg flex-grow flex flex-col overflow-hidden bg-white p-2`}
       >
-        <div className="space-y-1 min-h-[220px]">
+        {/* <div className="flex flex-wrap justify-start items-start gap-2 min-h-[220px]"> */}
+        <div className="grid grid-cols-1 justify-start items-start md:grid-cols-2 lg:grid-cols-5 gap-2 h-[220px] overflow-y-auto">
+          {" "}
           {members.length === 0 ? (
             <div className="py-8 text-center text-gray-400 italic text-sm">
               No members found
@@ -130,10 +135,7 @@ const MemberList = ({
                 </PaginationItem>
 
                 {getPageNumbers().map((page, idx) => {
-                  if (
-                    page === "ellipsis-1" ||
-                    page === "ellipsis-2"
-                  ) {
+                  if (page === "ellipsis-1" || page === "ellipsis-2") {
                     return (
                       <PaginationItem key={`ellipsis-${idx}`}>
                         <span className="px-1 text-gray-400 text-xs">...</span>
@@ -192,23 +194,59 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
 
   const allMembers = allMembersRes?.data || allMembersRes || [];
 
+  // const { attendedMembers, notAttendedMembers } = useMemo(() => {
+  //   const meetingData = meetingRes?.data || meetingRes;
+  //   if (!allMembers.length || !meetingData)
+  //     return { attendedMembers: [], notAttendedMembers: [] };
+
+  //   const attendedStr = meetingData.meeting_attendance || "";
+  //   const attendedIdsSet = new Set(
+  //     attendedStr
+  //       .split(",")
+  //       .map((id) => id.trim())
+  //       .filter((id) => id),
+  //   );
+
+  //   const attended = [];
+  //   const notAttended = [];
+
+  //   allMembers.forEach((member) => {
+  //     if (attendedIdsSet.has(member.id.toString())) {
+  //       attended.push(member);
+  //     } else {
+  //       notAttended.push(member);
+  //     }
+  //   });
+
+  //   return { attendedMembers: attended, notAttendedMembers: notAttended };
+  // }, [allMembers, meetingRes]);
+
   const { attendedMembers, notAttendedMembers } = useMemo(() => {
     const meetingData = meetingRes?.data || meetingRes;
-    if (!allMembers.length || !meetingData)
-      return { attendedMembers: [], notAttendedMembers: [] };
 
-    const attendedStr = meetingData.meeting_attendance || "";
+    if (!allMembers.length || !meetingData) {
+      return { attendedMembers: [], notAttendedMembers: [] };
+    }
+
     const attendedIdsSet = new Set(
-      attendedStr
+      (meetingData.meeting_attendance || "")
         .split(",")
         .map((id) => id.trim())
-        .filter((id) => id),
+        .filter(Boolean),
     );
 
     const attended = [];
     const notAttended = [];
+    const meetingGroups = (meetingData.meeting_to || "")
+      .split(",")
+      .map((g) => g.trim())
+      .filter(Boolean);
 
     allMembers.forEach((member) => {
+      if (!meetingGroups.includes(member.p_type)) {
+        return;
+      }
+
       if (attendedIdsSet.has(member.id.toString())) {
         attended.push(member);
       } else {
@@ -216,9 +254,11 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
       }
     });
 
-    return { attendedMembers: attended, notAttendedMembers: notAttended };
+    return {
+      attendedMembers: attended,
+      notAttendedMembers: notAttended,
+    };
   }, [allMembers, meetingRes]);
-
   const filteredAttended = attendedMembers.filter((m) =>
     (m.name || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
@@ -229,10 +269,14 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
 
   const isLoading = membersLoading || meetingLoading;
   const meetingData = meetingRes?.data || meetingRes || {};
+  const meetingfiltervalue = meetingData.meeting_to;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] md:w-full max-w-4xl" aria-describedby={undefined}>
+      <DialogContent
+        className="w-[95vw] md:w-full max-w-4xl top-[56%]"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle>View Attendance Details</DialogTitle>
           <p className="text-sm text-gray-500">
@@ -275,6 +319,14 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
               </div>
               <div>
                 <span className="font-semibold text-gray-600 block mb-1">
+                  Meeting Group
+                </span>
+                <span className="text-gray-900">
+                  {meetingData.meeting_to || "-"}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold text-gray-600 block mb-1">
                   Description
                 </span>
                 <span
@@ -305,14 +357,14 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
                 bgClass="bg-emerald-50"
                 borderClass="border-emerald-200"
               />
-              <MemberList
+              {/* <MemberList
                 title="Not Attended"
                 members={filteredNotAttended}
                 icon={XCircle}
                 colorClass="text-red-700"
                 bgClass="bg-red-50"
                 borderClass="border-red-200"
-              />
+              /> */}
             </div>
           </div>
         )}
