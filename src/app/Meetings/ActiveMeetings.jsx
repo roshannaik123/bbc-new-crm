@@ -10,7 +10,12 @@ import { useState } from "react";
 import CreateMeetingDialog from "./create-meeting";
 import AttendanceModal from "./AttendanceModal";
 import ViewAttendanceModal from "./ViewAttendanceModal";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ActiveMeetings = () => {
   const [openCreate, setOpenCreate] = useState(false);
@@ -56,6 +61,10 @@ const ActiveMeetings = () => {
     {
       header: "Meeting For",
       accessorKey: "meeting_for",
+    },
+    {
+      header: "Meeting Group",
+      accessorKey: "meeting_to",
     },
     {
       header: "Actions",
@@ -164,6 +173,7 @@ const ActiveMeetings = () => {
       />
 
       <AttendanceModal
+        data={meetingsData}
         open={openAttendance}
         onClose={() => setOpenAttendance(false)}
         meetingId={attendanceMeetingId}
