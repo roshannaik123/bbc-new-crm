@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
-
 export default function LoginForm({
   email,
   setEmail,
@@ -23,7 +22,7 @@ export default function LoginForm({
       className="lg:col-span-2 p-8 md:p-12 flex flex-col justify-center bg-white to-transparent"
     >
       <div className="flex items-center gap-1 p-2 rounded-md mb-8 ">
-        <img src="/logo.png" alt="BBC Logo" className="h-16" />
+        <img src="/img/logo.png" alt="BBC Logo" className="h-16" />
       </div>
 
       <motion.div
@@ -97,7 +96,11 @@ export default function LoginForm({
               Forgot password?
             </Link>
           </motion.div>
-          <Button className="w-full py-3 bg-[#AA2764]" type="submit" disabled={isLoading}>
+          <Button
+            className="w-full py-3 bg-[#AA2764]"
+            type="submit"
+            disabled={isLoading}
+          >
             {isLoading ? (
               <motion.span
                 key={loadingMessage}
