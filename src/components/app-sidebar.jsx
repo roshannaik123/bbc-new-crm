@@ -411,7 +411,7 @@ const useNavigationData = (user) => {
 };
 
 const Logo = ({ className }) => (
-  <img src="/logo.png" alt="Logo" className={className} />
+  <img src="/img/logo.png" alt="Logo" className={className} />
 );
 
 const TEAMS_CONFIG = [
