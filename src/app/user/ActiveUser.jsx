@@ -66,7 +66,8 @@ const ActiveUser = () => {
   const [selectedPTypes, setSelectedPTypes] = useState([]);
   const [pTypes, setPTypes] = useState([]);
   const [pTypesLoading, setPTypesLoading] = useState(false);
-  const [openJoiningDetailsDialog, setOpenJoiningDetailsDialog] = useState(false);
+  const [openJoiningDetailsDialog, setOpenJoiningDetailsDialog] =
+    useState(false);
   const [userIdForJoiningDetails, setUserIdForJoiningDetails] = useState(null);
   const [joiningDate, setJoiningDate] = useState("");
   const [whoJoinedId, setWhoJoinedId] = useState("");
@@ -491,8 +492,17 @@ const ActiveUser = () => {
       {/* Update Group Type Dialog */}
       <Dialog open={openGroupTypeDialog} onOpenChange={setOpenGroupTypeDialog}>
         <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+          <DialogHeader className="flex flex-row items-center justify-between">
             <DialogTitle>Update Group Type</DialogTitle>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedPTypes([])}
+              className="text-red-500 hover:text-red-600"
+            >
+              Clear
+            </Button>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">

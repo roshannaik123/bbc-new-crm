@@ -67,6 +67,10 @@ const ActiveMeetings = () => {
       accessorKey: "meeting_to",
     },
     {
+      header: "Attendence count",
+      accessorKey: "attendance_count",
+    },
+    {
       header: "Actions",
       accessorKey: "actions",
       enableSorting: false,

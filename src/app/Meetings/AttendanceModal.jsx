@@ -1,3 +1,4 @@
+// src/components/AttendanceModal.jsx
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,22 +21,21 @@ import { useApiMutation } from "@/hooks/useApiMutation";
 import { useGetApiMutation } from "@/hooks/useGetApiMutation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Search, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
-const AttendanceModal = ({ data, open, onClose, meetingId }) => {
-  console.log(data);
-
-  const currentMeeting = data?.find((item) => item.id === Number(meetingId));
-  console.log("attendecn", currentMeeting);
-
+export default function AttendanceModal({ data, open, onClose, meetingId }) {
+  /* --------------------------------------------------------------
+   *  State
+   * -------------------------------------------------------------- */
   const queryClient = useQueryClient();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
-  const [step, setStep] = useState("attendance"); // "attendance" or "visitors"
-  const [filterType, setFilterType] = useState("all"); // "all", "checked", "unchecked"
+  const [step, setStep] = useState("attendance"); // “attendance” | “visitors”
+  const [filterType, setFilterType] = useState("all"); // “all” | “checked” | “unchecked”
 
   const createInitialVisitorRow = () => ({
     guest_date: format(new Date(), "yyyy-MM-dd"),
@@ -45,17 +45,17 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
     guest_from_id: "",
     guest_description: "",
   });
-
   const [visitorRows, setVisitorRows] = useState([createInitialVisitorRow()]);
 
-  // API to fetch active members
+  /* --------------------------------------------------------------
+   *  API hooks
+   * -------------------------------------------------------------- */
   const { data: membersRes, isLoading: membersLoading } = useGetApiMutation({
     url: MEMBER_API.fetchActiveMembers,
     queryKey: ["active-members"],
     options: { enabled: open },
   });
 
-  // API to fetch meeting details
   const { data: meetingRes, isLoading: meetingLoading } = useGetApiMutation({
     url: meetingId ? MEETING_API.byId(meetingId) : "",
     queryKey: ["meeting", meetingId],
@@ -65,19 +65,76 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
   const { trigger: saveAttendance, loading: saveLoading } = useApiMutation();
   const { trigger: saveGuest, loading: saveGuestLoading } = useApiMutation();
 
-  const members = membersRes?.data || membersRes || [];
+  const members = useMemo(
+    () => membersRes?.data || membersRes || [],
+    [membersRes],
+  );
 
+  /* --------------------------------------------------------------
+   *  Derived data
+   * -------------------------------------------------------------- */
+  const currentMeeting = useMemo(
+    () => data?.find((item) => item.id === Number(meetingId)),
+    [data, meetingId],
+  );
+
+  const meetingGroups = useMemo(
+    () => (currentMeeting?.meeting_to?.split(",") ?? []).map((g) => g.trim()),
+    [currentMeeting?.meeting_to],
+  );
+
+  const groupMembers = useMemo(
+    () =>
+      members.filter((member) =>
+        meetingGroups.some((group) =>
+          (member.p_type ?? "")
+            .split(",")
+            .map((i) => i.trim())
+            .includes(group),
+        ),
+      ),
+    [members, meetingGroups],
+  );
+
+  /**
+   * filteredMembers respects the current search term **and**
+   * the filter type (all / checked / unchecked).
+   */
+  const filteredMembers = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return groupMembers.filter((m) => {
+      const matchesSearch = (m.name ?? "").toLowerCase().includes(term);
+      const isChecked = selectedMembers.some((sm) => sm.id === m.id);
+
+      if (filterType === "checked") return matchesSearch && isChecked;
+      if (filterType === "unchecked") return matchesSearch && !isChecked;
+      return matchesSearch;
+    });
+  }, [groupMembers, searchTerm, filterType, selectedMembers]);
+
+  const isAllSelected =
+    filteredMembers.length > 0 &&
+    filteredMembers.every((fm) =>
+      selectedMembers.some((sm) => sm.id === fm.id),
+    );
+
+  const isLoading = membersLoading || meetingLoading;
+
+  /* --------------------------------------------------------------
+   *  Reset state when modal opens / closes
+   * -------------------------------------------------------------- */
   useEffect(() => {
     if (open && members.length > 0 && meetingRes) {
-      const meetingData = meetingRes.data || meetingRes;
+      const meetingData = meetingRes?.data || meetingRes;
       setSearchTerm("");
       setFilterType("all");
+
       const existingAttendanceStr = meetingData.meeting_attendance || "";
       const existingIds = new Set(
         existingAttendanceStr
           .split(",")
           .map((id) => id.trim())
-          .filter((id) => id),
+          .filter(Boolean),
       );
 
       const preSelected = members.filter((m) =>
@@ -93,64 +150,45 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
       setStep("attendance");
       setVisitorRows([createInitialVisitorRow()]);
     }
-  }, [open, members.length, meetingRes]);
+  }, [open, members.length, meetingRes, members]);
 
+  /* --------------------------------------------------------------
+   *  Handlers
+   * -------------------------------------------------------------- */
   const handleToggleMember = (member) => {
+    // Guard – make sure the member belongs to the current meeting group
+    if (!groupMembers.some((m) => m.id === member.id)) return;
+
     setSelectedMembers((prev) => {
       const isSelected = prev.some((m) => m.id === member.id);
-      if (isSelected) {
-        return prev.filter((m) => m.id !== member.id);
-      } else {
-        return [...prev, member];
-      }
+      return isSelected
+        ? prev.filter((m) => m.id !== member.id)
+        : [...prev, member];
     });
   };
 
-  const meetingGroups =
-    currentMeeting?.meeting_to?.split(",").map((item) => item.trim()) || [];
-
-  const groupMembers = members.filter((member) =>
-    meetingGroups.includes(member.p_type),
-  );
-  const filteredMembers = groupMembers.filter((m) => {
-    const matchesSearch = (m.name || "")
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const isChecked = selectedMembers.some((sm) => sm.id === m.id);
-    if (filterType === "checked") {
-      return matchesSearch && isChecked;
-    }
-    if (filterType === "unchecked") {
-      return matchesSearch && !isChecked;
-    }
-    return matchesSearch;
-  });
-
   const handleSelectAll = (checked) => {
     if (checked) {
+      // Add any filtered member that isn’t already selected
       setSelectedMembers((prev) => {
-        const newSelections = [...prev];
+        const newSel = [...prev];
         filteredMembers.forEach((m) => {
-          if (!newSelections.some((sm) => sm.id === m.id)) {
-            newSelections.push(m);
-          }
+          if (!newSel.some((sm) => sm.id === m.id)) newSel.push(m);
         });
-        return newSelections;
+        return newSel;
       });
     } else {
+      // Remove only the filtered members from the selection
       setSelectedMembers((prev) =>
         prev.filter((m) => !filteredMembers.some((fm) => fm.id === m.id)),
       );
     }
   };
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value);
-  };
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
-  const handleAddVisitorRow = () => {
+  const handleAddVisitorRow = () =>
     setVisitorRows((prev) => [...prev, createInitialVisitorRow()]);
-  };
 
   const handleRemoveVisitorRow = (index) => {
     if (visitorRows.length === 1) {
@@ -182,30 +220,27 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
 
       if (res?.code === 200 || res?.success || res?.status === 200) {
         toast.success(
-          res.message || res.msg || "Attendance updated successfully",
+          res.message ?? res.msg ?? "Attendance updated successfully",
         );
         queryClient.invalidateQueries(["active-meetings"]);
         queryClient.invalidateQueries(["inactive-meetings"]);
 
-        if (shouldAddVisitor) {
-          setStep("visitors");
-        } else {
-          onClose();
-        }
+        if (shouldAddVisitor) setStep("visitors");
+        else onClose();
       } else {
-        toast.error(res?.message || res?.msg || "Failed to update attendance");
+        toast.error(res?.message ?? res?.msg ?? "Failed to update attendance");
       }
     } catch (error) {
-      const errorMsg =
-        error?.response?.data?.message || error?.response?.data?.msg;
-      toast.error(errorMsg || "Error updating attendance. Please try again.");
+      const errMsg =
+        error?.response?.data?.message ?? error?.response?.data?.msg;
+      toast.error(errMsg ?? "Error updating attendance. Please try again.");
     }
   };
 
   const handleSubmitVisitors = async (e) => {
     e.preventDefault();
 
-    // Validations
+    // Simple validation
     for (let i = 0; i < visitorRows.length; i++) {
       if (!visitorRows[i].guest_name) {
         toast.error(`Please enter a name for visitor #${i + 1}`);
@@ -218,7 +253,6 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
     }
 
     try {
-      // Save all visitors
       await Promise.all(
         visitorRows.map((row) =>
           saveGuest({
@@ -233,31 +267,27 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
       queryClient.invalidateQueries(["guest-list"]);
       onClose();
     } catch (error) {
-      toast.error(error?.message || "Failed to save visitor records");
+      toast.error(error?.message ?? "Failed to save visitor records");
     }
   };
 
-  const isAllSelected =
-    filteredMembers.length > 0 &&
-    filteredMembers.every((fm) =>
-      selectedMembers.some((sm) => sm.id === fm.id),
-    );
-  const isLoading = membersLoading || meetingLoading;
-
+  /* --------------------------------------------------------------
+   *  Render
+   * -------------------------------------------------------------- */
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent
-        className="w-full max-w-full md:w-[90vw] md:max-w-[90vw] max-h-[98vh] md:max-h-[90vh] overflow-y-auto rounded-none md:rounded-lg flex flex-col p-4 md:p-6 transition-all duration-300"
-        aria-describedby={undefined}
-      >
+      <DialogContent className="w-full max-w-full md:w-[90vw] md:max-w-[90vw] max-h-[98vh] md:max-h-[90vh] overflow-y-auto rounded-none md:rounded-lg flex flex-col p-4 md:p-6 transition-all duration-300">
         {step === "attendance" ? (
           <>
+            {/* Header */}
             <DialogHeader>
               <DialogTitle>Mark Attendance</DialogTitle>
               <p className="text-sm text-gray-500">
                 Select members who attended this meeting
               </p>
             </DialogHeader>
+
+            {/* Meeting meta */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border">
               <div>
                 <p className="text-xs text-gray-500">Date</p>
@@ -274,31 +304,33 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
               <div>
                 <p className="text-xs text-gray-500">Time</p>
                 <p className="font-medium">
-                  {currentMeeting?.meeting_time || "-"}
+                  {currentMeeting?.meeting_time ?? "-"}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-gray-500">Meeting For</p>
                 <p className="font-medium">
-                  {currentMeeting?.meeting_for || "-"}
+                  {currentMeeting?.meeting_for ?? "-"}
                 </p>
               </div>
 
               <div>
                 <p className="text-xs text-gray-500">Meeting Group</p>
                 <p className="font-medium">
-                  {currentMeeting?.meeting_to || "-"}
+                  {currentMeeting?.meeting_to ?? "-"}
                 </p>
               </div>
             </div>
 
+            {/* Loading */}
             {isLoading ? (
               <div className="flex justify-center p-10">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Search */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                   <Input
@@ -309,6 +341,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                   />
                 </div>
 
+                {/* Filter buttons */}
                 <div className="flex gap-1.5 p-1 bg-gray-100/80 rounded-lg border border-gray-200/50">
                   <button
                     type="button"
@@ -322,6 +355,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                   >
                     All ({groupMembers.length})
                   </button>
+
                   <button
                     type="button"
                     onClick={() => setFilterType("checked")}
@@ -332,8 +366,15 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                         : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30",
                     )}
                   >
-                    Checked ({selectedMembers.length})
+                    Checked (
+                    {
+                      filteredMembers.filter((m) =>
+                        selectedMembers.some((sm) => sm.id === m.id),
+                      ).length
+                    }
+                    )
                   </button>
+
                   <button
                     type="button"
                     onClick={() => setFilterType("unchecked")}
@@ -344,10 +385,16 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                         : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/30",
                     )}
                   >
-                    Unchecked ({groupMembers.length - selectedMembers.length})
+                    Unchecked (
+                    {filteredMembers.length -
+                      filteredMembers.filter((m) =>
+                        selectedMembers.some((sm) => sm.id === m.id),
+                      ).length}
+                    )
                   </button>
                 </div>
 
+                {/* Select‑all bar */}
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-100">
                   <div className="flex items-center space-x-2">
                     <Checkbox
@@ -367,11 +414,12 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                   </span>
                 </div>
 
+                {/* Member list */}
                 <div className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50/30 p-3">
                   <div className="max-h-[360px] overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 pr-1">
                     {filteredMembers.length === 0 ? (
                       <div className="col-span-full p-8 text-center text-gray-400 text-sm bg-white rounded-lg border border-gray-150">
-                        No members found matching "{searchTerm}"
+                        No members found matching &quot;{searchTerm}&quot;
                       </div>
                     ) : (
                       filteredMembers.map((member) => {
@@ -396,7 +444,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                               onClick={(e) => e.stopPropagation()}
                             />
                             <div className="flex flex-col flex-1 min-w-0 leading-none">
-                              <span className="font-semibold text-sm cursor-pointer mb-1 truncate text-gray-800">
+                              <span className="font-semibold text-sm truncate text-gray-800">
                                 {member.name}
                               </span>
                               <span className="text-xs text-gray-500 truncate">
@@ -412,6 +460,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
               </div>
             )}
 
+            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t w-full">
               <Button
                 variant="outline"
@@ -421,8 +470,9 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
               >
                 Cancel
               </Button>
+
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() => handleSubmitAttendance(false)}
                 disabled={
                   saveLoading || isLoading || selectedMembers.length === 0
@@ -434,6 +484,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                 )}
                 Save Attendance
               </Button>
+
               <Button
                 onClick={() => handleSubmitAttendance(true)}
                 disabled={
@@ -444,11 +495,12 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                 {saveLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Save Attendance & Add Visitor
+                Save Attendance &amp; Add Visitor
               </Button>
             </div>
           </>
         ) : (
+          /* ------------------- Visitor step ------------------- */
           <>
             <DialogHeader className="pb-4 border-b">
               <DialogTitle className="text-xl font-bold text-gray-900">
@@ -463,9 +515,9 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
               onSubmit={handleSubmitVisitors}
               className="flex-1 flex flex-col min-h-0"
             >
-              {/* Scrollable Container for Rows */}
+              {/* Visitor rows (scrollable) */}
               <div className="flex-1 overflow-y-auto py-4 space-y-4 pr-1 min-h-[200px] max-h-[50vh]">
-                {/* Desktop Header */}
+                {/* Header for desktops */}
                 <div className="hidden md:grid grid-cols-12 gap-3 pb-2 px-1 text-xs font-semibold text-gray-500 border-b border-gray-100">
                   <div className="col-span-2">Date *</div>
                   <div className="col-span-2">Name *</div>
@@ -481,7 +533,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                     key={index}
                     className="grid grid-cols-1 md:grid-cols-12 gap-3 p-4 md:p-1 bg-gray-50/50 border border-gray-200/80 rounded-xl md:border-none md:bg-transparent md:items-center relative shadow-sm md:shadow-none"
                   >
-                    {/* Date Input */}
+                    {/* Date */}
                     <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Date *
@@ -501,7 +553,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       />
                     </div>
 
-                    {/* Name Input */}
+                    {/* Name */}
                     <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Name *
@@ -521,7 +573,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       />
                     </div>
 
-                    {/* Number Input */}
+                    {/* Mobile */}
                     <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Number
@@ -540,7 +592,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       />
                     </div>
 
-                    {/* Type Selection */}
+                    {/* Type */}
                     <div className="col-span-1 md:col-span-1 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Type *
@@ -563,7 +615,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       </Select>
                     </div>
 
-                    {/* Sponsoring Member Selection */}
+                    {/* Invited By */}
                     <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Invited By *
@@ -587,7 +639,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       </Select>
                     </div>
 
-                    {/* Description Input */}
+                    {/* Description */}
                     <div className="col-span-1 md:col-span-2 space-y-1 md:space-y-0">
                       <Label className="md:hidden text-xs font-semibold text-gray-500">
                         Description
@@ -606,7 +658,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                       />
                     </div>
 
-                    {/* Delete Button */}
+                    {/* Delete button */}
                     <div className="col-span-1 md:col-span-1 flex justify-end md:justify-center pt-2 md:pt-0">
                       <Button
                         type="button"
@@ -623,7 +675,7 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
                 ))}
               </div>
 
-              {/* Action Buttons */}
+              {/* Bottom actions */}
               <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-4 border-t mt-4">
                 <Button
                   type="button"
@@ -663,6 +715,4 @@ const AttendanceModal = ({ data, open, onClose, meetingId }) => {
       </DialogContent>
     </Dialog>
   );
-};
-
-export default AttendanceModal;
+}

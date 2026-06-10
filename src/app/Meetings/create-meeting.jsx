@@ -49,7 +49,6 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
         method: "get",
       });
       const data = res?.data || res || [];
-      console.log(data);
       setPTypes(data);
     } catch (error) {
       toast.error("Failed to fetch group types");
@@ -184,46 +183,34 @@ const CreateMeetingDialog = ({ open, onClose, Id }) => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
-                  {formData.meeting_to || "Select Meeting Types"}
-                  <ChevronDown className="h-4 w-4" />
+                  {formData.meeting_to || "Select Meeting Type"}
+                  <ChevronDown className="h-4 w-4 ml-2" />
                 </Button>
               </PopoverTrigger>
 
-              <PopoverContent className="w-[300px] p-3">
-                <div className="space-y-3">
+              <PopoverContent className="w-[300px] p-2">
+                <div className="space-y-1">
                   {pTypes.map((type) => {
-                    const selectedValues = formData.meeting_to
-                      ? formData.meeting_to.split(",")
-                      : [];
-
-                    const checked = selectedValues.includes(type.p_type);
+                    const isSelected = formData.meeting_to === type.p_type;
 
                     return (
                       <div
                         key={type.id}
-                        className="flex items-center space-x-2"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            meeting_to: type.p_type, // ✅ SINGLE VALUE ONLY
+                          }))
+                        }
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-gray-100 ${
+                          isSelected ? "bg-gray-100" : ""
+                        }`}
                       >
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(value) => {
-                            let updatedValues = [...selectedValues];
-
-                            if (value) {
-                              updatedValues.push(type.p_type);
-                            } else {
-                              updatedValues = updatedValues.filter(
-                                (v) => v !== type.p_type,
-                              );
-                            }
-
-                            setFormData((prev) => ({
-                              ...prev,
-                              meeting_to: updatedValues.join(","),
-                            }));
-                          }}
-                        />
-
                         <span className="text-sm">{type.p_type}</span>
+
+                        {isSelected && (
+                          <Check className="h-4 w-4 text-green-600" />
+                        )}
                       </div>
                     );
                   })}

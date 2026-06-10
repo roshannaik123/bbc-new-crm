@@ -8,15 +8,15 @@ const AuthRoute = () => {
   const { isLoading, isAuthenticated } = useAuth();
   const isPublicAuthRoute = isAuthRoute(location.pathname);
 
-  if (isLoading) {
+  if (isLoading && !isPublicAuthRoute) {
     return <DashboardSkeleton />;
   }
 
-  if (isAuthenticated && isPublicAuthRoute) {
-    return <Navigate to="/dashboard" replace />;
+  if (!isAuthenticated) {
+    return <Outlet />;
   }
 
-  return <Outlet />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default AuthRoute;
