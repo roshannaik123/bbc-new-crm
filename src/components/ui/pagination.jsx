@@ -28,12 +28,7 @@ const PaginationItem = React.forwardRef(({ className, ...props }, ref) => (
 ));
 PaginationItem.displayName = "PaginationItem";
 
-const PaginationLink = ({
-  className,
-  isActive,
-  size = "icon",
-  ...props
-}) => (
+const PaginationLink = ({ className, isActive, size = "icon", ...props }) => (
   <button
     type="button"
     aria-current={isActive ? "page" : undefined}
@@ -42,17 +37,14 @@ const PaginationLink = ({
         variant: isActive ? "outline" : "ghost",
         size,
       }),
-      className
+      className,
     )}
     {...props}
   />
 );
 PaginationLink.displayName = "PaginationLink";
 
-const PaginationPrevious = ({
-  className,
-  ...props
-}) => (
+const PaginationPrevious = ({ className, ...props }) => (
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
@@ -60,15 +52,12 @@ const PaginationPrevious = ({
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
-    <span className="hidden sm:inline">Previous</span>
+    <span className="hidden sm:inline">Prev</span>
   </PaginationLink>
 );
 PaginationPrevious.displayName = "PaginationPrevious";
 
-const PaginationNext = ({
-  className,
-  ...props
-}) => (
+const PaginationNext = ({ className, ...props }) => (
   <PaginationLink
     aria-label="Go to next page"
     size="default"
@@ -81,10 +70,7 @@ const PaginationNext = ({
 );
 PaginationNext.displayName = "PaginationNext";
 
-const PaginationEllipsis = ({
-  className,
-  ...props
-}) => (
+const PaginationEllipsis = ({ className, ...props }) => (
   <span
     aria-hidden
     className={cn("flex h-9 w-9 items-center justify-center", className)}

@@ -20,8 +20,54 @@ import {
   Mail,
 } from "lucide-react";
 
+/* ------------------------------------------------------------------ */
+/*  Colour palette – same two colours as the original component          */
+/* ------------------------------------------------------------------ */
 const COLORS = ["#4F46E5", "#22C55E"];
 
+/* ------------------------------------------------------------------ */
+/*  Helper – renders a pie‑chart for a single group entry               */
+/* ------------------------------------------------------------------ */
+const GroupPie = ({ groupName, totalMeetings, attendanceCount }) => {
+  const attendancePerc =
+    totalMeetings > 0 ? Math.round((attendanceCount / totalMeetings) * 100) : 0;
+
+  const data = [
+    { name: "Attendance", value: attendancePerc },
+    { name: "Remaining", value: 100 - attendancePerc },
+  ];
+
+  return (
+    <div className="flex flex-col items-center gap-2 p-2 min-w-[120px]">
+      <h4 className="text-sm font-medium text-gray-700">{groupName}</h4>
+      <div className="w-28 h-28 sm:w-32 sm:h-32">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              innerRadius={38}
+              outerRadius={55}
+              dataKey="value"
+              paddingAngle={4}
+            >
+              {data.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <p className="text-xs text-gray-600">
+        {attendanceCount}/{totalMeetings}
+      </p>
+      <p className="text-xs font-medium text-indigo-600">{attendancePerc}%</p>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
+/*  Main Activity component                                           */
+/* ------------------------------------------------------------------ */
 const Activity = () => {
   const { trigger: fetchActivity } = useApiMutation();
 
@@ -73,7 +119,7 @@ const Activity = () => {
     <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-6">
       <Card className="max-w-8xl mx-auto shadow-lg border-t-4 border-t-primary bg-white">
         <CardContent>
-          {/* HEADER */}
+          {/* -------- Header -------- */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b py-5">
             <div>
               <h1 className="text-xl sm:text-2xl font-semibold text-primary uppercase">
@@ -93,7 +139,7 @@ const Activity = () => {
             </Button>
           </div>
 
-          {/* ERROR */}
+          {/* -------- Error -------- */}
           {error ? (
             <div className="flex items-center justify-center py-16 sm:py-20">
               <div className="text-center p-6 sm:p-8 max-w-sm w-full border shadow-xl rounded-2xl">
@@ -111,27 +157,10 @@ const Activity = () => {
               </div>
             </div>
           ) : (
-            /* CARDS */
+            /* -------- Activity Cards -------- */
             <div className="space-y-6 sm:space-y-8 mt-6">
               {activities.map((item, index) => {
                 const a = item?.attendance || item;
-                console.log(item);
-
-                const attended = Number(a?.attendance_count || 0);
-                const total = Number(a?.total_meeting || 0);
-                const attendancePercentage =
-                  total > 0 ? Math.round((attended / total) * 100) : 0;
-
-                const pieData = [
-                  {
-                    name: "Attendance",
-                    value: attendancePercentage,
-                  },
-                  {
-                    name: "Remaining",
-                    value: 100 - attendancePercentage,
-                  },
-                ];
 
                 return (
                   <motion.div
@@ -141,11 +170,11 @@ const Activity = () => {
                     transition={{ duration: 0.4 }}
                     className="rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white to-gray-50 shadow-lg sm:shadow-xl border p-4 sm:p-8"
                   >
-                    {/* MAIN LAYOUT */}
+                    {/* ---- Main Layout ---- */}
                     <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                      {/* LEFT */}
+                      {/* ---- Left: User Info ---- */}
                       <div className="flex-1">
-                        {/* USER SECTION */}
+                        {/* User section */}
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
                           <img
                             src={
@@ -182,7 +211,7 @@ const Activity = () => {
                           </div>
                         </div>
 
-                        {/* TAGS */}
+                        {/* Tags */}
                         <div className="flex flex-wrap gap-2 sm:gap-4 mt-4 sm:mt-6">
                           <div className="px-3 sm:px-5 py-1 sm:py-2 rounded-full bg-indigo-100 text-indigo-700 flex items-center gap-2 text-xs sm:text-sm font-medium">
                             <Tag size={14} />
@@ -195,7 +224,7 @@ const Activity = () => {
                           </div>
                         </div>
 
-                        {/* STATS GRID */}
+                        {/* Stats Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6 sm:mt-8">
                           <Stat
                             label="One to One"
@@ -225,64 +254,22 @@ const Activity = () => {
                         </div>
                       </div>
 
-                      {/* RIGHT - CHART */}
-                      <div className="w-full lg:w-72 flex flex-col items-center justify-center mt-6 lg:mt-0">
-                        <div className="w-40 h-40 sm:w-56 sm:h-56 lg:w-64 lg:h-64">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={pieData}
-                                innerRadius={50}
-                                outerRadius={80}
-                                dataKey="value"
-                                paddingAngle={4}
-                              >
-                                {pieData.map((_, idx) => (
-                                  <Cell
-                                    key={idx}
-                                    fill={COLORS[idx % COLORS.length]}
-                                  />
-                                ))}
-                              </Pie>
-                            </PieChart>
-                          </ResponsiveContainer>
-                        </div>
-
-                        <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-600 mt-2">
-                          {attendancePercentage}%
+                      {/* ---- Right: Group‑wise pies on a single line ---- */}
+                      <div className="w-full lg:w-96 flex flex-col items-center justify-start mt-6 lg:mt-0">
+                        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                          Group‑wise Attendance
                         </h3>
 
-                        <p className="text-gray-500 text-sm">
-                          Attendance ({attended}/{total})
-                        </p>
-
-                        {/* BONUS */}
-                        <div className="mt-4 sm:mt-6 flex gap-3 sm:gap-4">
-                          <div className="bg-yellow-100 px-3 sm:px-5 py-2 sm:py-3 rounded-2xl text-center shadow">
-                            <Award
-                              className="mx-auto text-yellow-600 mb-1"
-                              size={18}
+                        {/* Horizontal scroll container – pies stay on one line */}
+                        <div className="flex flex-nowrap overflow-x-auto gap-4">
+                          {a?.group_wise?.map((g) => (
+                            <GroupPie
+                              key={g.group_name}
+                              groupName={g.group_name}
+                              totalMeetings={g.total_meetings}
+                              attendanceCount={g.attendance_count}
                             />
-                            <p className="text-xs sm:text-sm text-gray-500">
-                              Bonus
-                            </p>
-                            <h4 className="font-bold text-base sm:text-lg">
-                              {a?.bonus_point || 0}
-                            </h4>
-                          </div>
-
-                          <div className="bg-orange-100 px-3 sm:px-5 py-2 sm:py-3 rounded-2xl text-center shadow">
-                            <Star
-                              className="mx-auto text-orange-600 mb-1"
-                              size={18}
-                            />
-                            <p className="text-xs sm:text-sm text-gray-500">
-                              Chief Guest
-                            </p>
-                            <h4 className="font-bold text-base sm:text-lg">
-                              {a?.chief_guest_count || 0}
-                            </h4>
-                          </div>
+                          ))}
                         </div>
                       </div>
                     </div>
@@ -297,8 +284,9 @@ const Activity = () => {
   );
 };
 
-/* ---------------- STAT ---------------- */
-
+/* ------------------------------------------------------------------ */
+/*  Re‑usable Stat component (unchanged)                              */
+/* ------------------------------------------------------------------ */
 const Stat = ({ label, value, color }) => {
   return (
     <motion.div
