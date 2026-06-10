@@ -31,8 +31,7 @@ const MemberList = ({
   borderClass,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  console.log("members", members);
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 15;
   useEffect(() => {
     setCurrentPage(1);
   }, [members]);
@@ -127,7 +126,7 @@ const MemberList = ({
                     disabled={currentPage === 1}
                     className={
                       currentPage === 1
-                        ? "pointer-events-none opacity-50 h-7 w-7 p-0"
+                        ? "pointer-events-none opacity-50 h-7 w-7 p-0 mr-3"
                         : "cursor-pointer h-7 w-7 p-0"
                     }
                   />
@@ -226,7 +225,6 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
     if (!allMembers.length || !meetingData) {
       return { attendedMembers: [], notAttendedMembers: [] };
     }
-    console.log("allmember", allMembers);
 
     const attendedIdsSet = new Set(
       (meetingData.meeting_attendance || "")
@@ -234,7 +232,6 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
         .map((id) => id.trim())
         .filter(Boolean),
     );
-    console.log("attendence", attendedIdsSet);
 
     const attended = [];
     const notAttended = [];
@@ -320,17 +317,6 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
                 </span>
                 <span className="text-gray-900">
                   {meetingData.meeting_to || "-"}
-                </span>
-              </div>
-              <div>
-                <span className="font-semibold text-gray-600 block mb-1">
-                  Description
-                </span>
-                <span
-                  className="text-gray-900 truncate block"
-                  title={meetingData.meeting_description}
-                >
-                  {meetingData.meeting_description || "-"}
                 </span>
               </div>
             </div>
