@@ -93,6 +93,7 @@ export default function AuthUI() {
         method: "post",
         data: formData,
       });
+
       if (res?.code === 200) {
         const { UserInfo, version, year } = res;
 

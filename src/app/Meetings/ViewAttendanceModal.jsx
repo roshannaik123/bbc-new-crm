@@ -31,9 +31,8 @@ const MemberList = ({
   borderClass,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-
-  const ITEMS_PER_PAGE = 5;
-
+  console.log("members", members);
+  const ITEMS_PER_PAGE = 10;
   useEffect(() => {
     setCurrentPage(1);
   }, [members]);
@@ -227,6 +226,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
     if (!allMembers.length || !meetingData) {
       return { attendedMembers: [], notAttendedMembers: [] };
     }
+    console.log("allmember", allMembers);
 
     const attendedIdsSet = new Set(
       (meetingData.meeting_attendance || "")
@@ -234,6 +234,7 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
         .map((id) => id.trim())
         .filter(Boolean),
     );
+    console.log("attendence", attendedIdsSet);
 
     const attended = [];
     const notAttended = [];
@@ -243,10 +244,6 @@ const ViewAttendanceModal = ({ open, onClose, meetingId }) => {
       .filter(Boolean);
 
     allMembers.forEach((member) => {
-      if (!meetingGroups.includes(member.p_type)) {
-        return;
-      }
-
       if (attendedIdsSet.has(member.id.toString())) {
         attended.push(member);
       } else {
