@@ -180,8 +180,13 @@ const NAVIGATION_CONFIG = {
       icon: BarChart3,
       items: [
         {
-          title: "Attendance Report",
+          title: "Activity Report",
           url: "/report/attendence-report",
+          icon: ClipboardListIcon,
+        },
+        {
+          title: "Activity Print",
+          url: "/report/activity-print",
           icon: ClipboardListIcon,
         },
         {

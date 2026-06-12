@@ -34,6 +34,7 @@ import Download from "@/app/download/Download";
 import BonusPoint from "@/app/bonus-point/BonusPoint";
 import AttendenceReport from "@/app/report/AttendenceReport";
 import Activity from "@/app/activity/Activity";
+import ActivityPrint from "@/app/report/ActivityPrint";
 
 function AppRoutes() {
   return (
@@ -259,6 +260,14 @@ function AppRoutes() {
             element={
               <Suspense fallback={<LoadingBar />}>
                 <AttendenceReport />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/report/activity-print"
+            element={
+              <Suspense fallback={<LoadingBar />}>
+                <ActivityPrint />
               </Suspense>
             }
           />

@@ -32,6 +32,7 @@ const initialState = {
 
 const CreateLeadDialog = ({ open, onClose, leadId }) => {
   const [formData, setFormData] = useState(initialState);
+  const [submitMode, setSubmitMode] = useState("continue");
   const [errors, setErrors] = useState({});
   const queryClient = useQueryClient();
 
@@ -51,7 +52,7 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
 
   useEffect(() => {
     if (!open) return;
-    
+
     if (!isEdit) {
       setFormData(initialState);
       setErrors({});
@@ -67,7 +68,9 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
         const data = res?.data || res;
         if (data) {
           setFormData({
-            lead_date: data.lead_date ? moment(data.lead_date).format("YYYY-MM-DD") : "",
+            lead_date: data.lead_date
+              ? moment(data.lead_date).format("YYYY-MM-DD")
+              : "",
             lead_from_id: data.lead_from_id ? String(data.lead_from_id) : "",
             lead_to_id: data.lead_to_id ? String(data.lead_to_id) : "",
             lead_amount: data.lead_amount || "",
@@ -95,8 +98,10 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
   const validate = () => {
     const newErrors = {};
     if (!formData.lead_date) newErrors.lead_date = "Date is required";
-    if (!formData.lead_from_id) newErrors.lead_from_id = "Lead from is required";
-    if (!formData.lead_to_id) newErrors.lead_to_id = "Lead to is required";
+    if (!formData.lead_from_id)
+      newErrors.lead_from_id = "Lead Given By is required";
+    if (!formData.lead_to_id)
+      newErrors.lead_to_id = "Lead Received By is required";
     if (!formData.lead_amount) newErrors.lead_amount = "Amount is required";
 
     if (
@@ -104,17 +109,20 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
       formData.lead_to_id &&
       formData.lead_from_id === formData.lead_to_id
     ) {
-      newErrors.lead_to_id = "Lead From and To cannot be the same";
-      toast.error("Lead From and To members cannot be the same");
+      newErrors.lead_to_id = "Lead Received and Given By cannot be the same";
+      toast.error("Lead Received By and Given By members cannot be the same");
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, mode) => {
     e.preventDefault();
-    if (!validate()) return;
+
+    if (!validate()) {
+      return;
+    }
 
     try {
       const payload = {
@@ -128,15 +136,27 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
         data: payload,
       });
 
-      if (res?.code === 200 || res?.success || res?.status === "success" || res?.status === 200) {
-        toast.success(res.message || `Lead ${isEdit ? "updated" : "created"} successfully`);
+      if (res?.code === 200 || res?.success || res?.status === "success") {
+        toast.success(
+          res.message || `Lead ${isEdit ? "updated" : "created"} successfully`,
+        );
+
         queryClient.invalidateQueries(["leads"]);
-        onClose();
+
+        if (isEdit || mode === "close") {
+          onClose();
+        } else {
+          setFormData((prev) => ({
+            ...prev,
+            lead_from_id: "",
+            lead_amount: "",
+          }));
+        }
       } else {
-        toast.error(res?.message || res?.msg || "Failed to process request");
+        toast.error(res?.message || "Failed to process request");
       }
     } catch (error) {
-      toast.error(error?.response?.data?.message || error?.response?.data?.msg || "An error occurred");
+      toast.error(error?.response?.data?.message || "Error occurred");
     }
   };
 
@@ -146,8 +166,12 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Lead" : "Add New Lead"}</DialogTitle>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4 py-2">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(e, "continue"); // ENTER always continue
+          }}
+        >
           <div className="space-y-2">
             <Label htmlFor="lead_date">
               Lead Date <span className="text-red-500">*</span>
@@ -164,43 +188,21 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
               <p className="text-sm text-red-500">{errors.lead_date}</p>
             )}
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="lead_from_id">
-              Lead From <span className="text-red-500">*</span>
-            </Label>
-            <Select
-              value={formData.lead_from_id}
-              onValueChange={(val) => handleSelectChange("lead_from_id", val)}
-              disabled={membersLoading}
-            >
-              <SelectTrigger className={errors.lead_from_id ? "border-red-500" : ""}>
-                <SelectValue placeholder={membersLoading ? "Loading..." : "Select Member"} />
-              </SelectTrigger>
-              <SelectContent>
-                {members.map((member) => (
-                  <SelectItem key={member.id} value={String(member.id)}>
-                    {member.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.lead_from_id && (
-              <p className="text-sm text-red-500">{errors.lead_from_id}</p>
-            )}
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="lead_to_id">
-              Lead To <span className="text-red-500">*</span>
+              Lead Received By <span className="text-red-500">*</span>
             </Label>
             <Select
               value={formData.lead_to_id}
               onValueChange={(val) => handleSelectChange("lead_to_id", val)}
               disabled={membersLoading}
             >
-              <SelectTrigger className={errors.lead_to_id ? "border-red-500" : ""}>
-                <SelectValue placeholder={membersLoading ? "Loading..." : "Select Member"} />
+              <SelectTrigger
+                className={errors.lead_to_id ? "border-red-500" : ""}
+              >
+                <SelectValue
+                  placeholder={membersLoading ? "Loading..." : "Select Member"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {members.map((member) => (
@@ -212,6 +214,35 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
             </Select>
             {errors.lead_to_id && (
               <p className="text-sm text-red-500">{errors.lead_to_id}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lead_from_id">
+              Lead Given By <span className="text-red-500">*</span>
+            </Label>
+            <Select
+              value={formData.lead_from_id}
+              onValueChange={(val) => handleSelectChange("lead_from_id", val)}
+              disabled={membersLoading}
+            >
+              <SelectTrigger
+                className={errors.lead_from_id ? "border-red-500" : ""}
+              >
+                <SelectValue
+                  placeholder={membersLoading ? "Loading..." : "Select Member"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {members.map((member) => (
+                  <SelectItem key={member.id} value={String(member.id)}>
+                    {member.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.lead_from_id && (
+              <p className="text-sm text-red-500">{errors.lead_from_id}</p>
             )}
           </div>
 
@@ -242,8 +273,20 @@ const CreateLeadDialog = ({ open, onClose, leadId }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {!isEdit && (
+              <Button
+                type="button"
+                onClick={(e) => handleSubmit(e, "continue")}
+                disabled={isSubmitting}
+              >
+                Add New Lead
+              </Button>
+            )}
+            <Button
+              type="button"
+              onClick={(e) => handleSubmit(e, "close")}
+              disabled={isSubmitting}
+            >
               {isEdit ? "Update Lead" : "Create Lead"}
             </Button>
           </div>
