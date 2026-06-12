@@ -35,7 +35,6 @@ const Contact = () => {
   const { trigger: deleteContact, loading: isDeleting } = useApiMutation();
 
   const contactData = data?.contact || data?.data || data || [];
-
   const handleDeleteClick = (id) => {
     setContactIdToDelete(id);
     setOpenDeleteDialog(true);
@@ -48,16 +47,20 @@ const Contact = () => {
         method: "delete",
       });
 
-      if (res?.code === 200 || res?.status === "success" || res?.status === 200) {
-        toast.success(res?.msg || res?.message || "Contact deleted successfully");
+      if (
+        res?.code === 200 ||
+        res?.status === "success" ||
+        res?.status === 200
+      ) {
+        toast.success(
+          res?.msg || res?.message || "Contact deleted successfully",
+        );
         queryClient.invalidateQueries(["contact"]);
       } else {
         toast.error(res?.message || res?.msg || "Failed to delete contact");
       }
     } catch (error) {
-      toast.error(
-        error?.response?.data?.message || "Failed to delete contact"
-      );
+      toast.error(error?.response?.data?.message || "Failed to delete contact");
     } finally {
       setOpenDeleteDialog(false);
       setContactIdToDelete(null);
@@ -138,8 +141,8 @@ const Contact = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this contact? This action cannot be
-              undone.
+              Are you sure you want to delete this contact? This action cannot
+              be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

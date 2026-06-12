@@ -8,7 +8,12 @@ import { Edit } from "lucide-react";
 import moment from "moment";
 import { useState } from "react";
 import CreateLeadDialog from "./create-lead";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function Leads() {
   const [openCreate, setOpenCreate] = useState(false);
@@ -43,12 +48,12 @@ function Leads() {
           : "-",
     },
     {
-      header: "Lead From",
+      header: "Lead Given By",
       accessorKey: "lead_from",
       cell: ({ row }) => row.original.lead_from?.name || "N/A",
     },
     {
-      header: "Lead To",
+      header: "Lead Taken By",
       accessorKey: "lead_to",
       cell: ({ row }) => row.original.lead_to?.name || "N/A",
     },

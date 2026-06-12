@@ -21,7 +21,7 @@ import moment from "moment";
 const AttendenceReport = () => {
   const [fromDate, setFromDate] = useState(moment().format("YYYY-MM-DD"));
   const [toDate, setToDate] = useState(moment().format("YYYY-MM-DD"));
-  const [selectedPType, setSelectedPType] = useState("all");
+  const [selectedPType, setSelectedPType] = useState("");
   const [pTypes, setPTypes] = useState([]);
   const [reportData, setReportData] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -54,6 +54,11 @@ const AttendenceReport = () => {
       toast.error("Please select both from and to dates");
       return;
     }
+    console.log("test", selectedPType);
+    if (!selectedPType) {
+      toast.error("Please select Group Type");
+      return;
+    }
 
     try {
       setIsFetching(true);
@@ -63,13 +68,13 @@ const AttendenceReport = () => {
         data: {
           from_date: fromDate,
           to_date: toDate,
-          p_type: selectedPType === "all" ? "" : selectedPType,
+          p_type: selectedPType,
         },
       });
-      
+
       const data = res?.data || res || [];
       setReportData(Array.isArray(data) ? data : []);
-      
+
       if (Array.isArray(data) && data.length === 0) {
         toast.info("No records found for the selected filters");
       }
@@ -82,6 +87,10 @@ const AttendenceReport = () => {
   };
 
   const handleExportExcel = () => {
+    if (!selectedPType) {
+      toast.error("Please select Group Type");
+      return;
+    }
     if (reportData.length === 0) {
       toast.error("No data available to export");
       return;
@@ -114,8 +123,8 @@ const AttendenceReport = () => {
     exportToExcel({
       data: dataToExport,
       columns,
-      fileName: `Attendance_Report_${fromDate}_to_${toDate}.xlsx`,
-      reportTitle: `Attendance Report (${fromDate} to ${toDate})`,
+      fileName: `Activity_Report_${fromDate}_to_${toDate}.xlsx`,
+      reportTitle: `Activity Report (${fromDate} to ${toDate})`,
     });
 
     toast.success("Excel report generated successfully");
@@ -190,7 +199,7 @@ const AttendenceReport = () => {
         <CardHeader className="pb-4">
           <CardTitle className="text-xl font-bold flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            Attendance Report
+            Activity Report
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -199,6 +208,7 @@ const AttendenceReport = () => {
               <Label htmlFor="fromDate">From Date</Label>
               <Input
                 id="fromDate"
+                required
                 type="date"
                 value={fromDate}
                 onChange={(e) => setFromDate(e.target.value)}
@@ -207,6 +217,7 @@ const AttendenceReport = () => {
             <div className="space-y-2">
               <Label htmlFor="toDate">To Date</Label>
               <Input
+                required
                 id="toDate"
                 type="date"
                 value={toDate}
@@ -216,6 +227,7 @@ const AttendenceReport = () => {
             <div className="space-y-2">
               <Label>Group Type</Label>
               <Select
+                required
                 value={selectedPType}
                 onValueChange={setSelectedPType}
                 disabled={isPTypesLoading}
@@ -224,7 +236,6 @@ const AttendenceReport = () => {
                   <SelectValue placeholder="Select Group" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Groups</SelectItem>
                   {pTypes.map((type) => {
                     const value = type.p_type || type.name || type;
                     return (
@@ -237,8 +248,8 @@ const AttendenceReport = () => {
               </Select>
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={handleFetchReport} 
+              <Button
+                onClick={handleFetchReport}
                 className="flex-1"
                 disabled={isFetching}
               >
@@ -253,7 +264,7 @@ const AttendenceReport = () => {
                 variant="outline"
                 onClick={handleExportExcel}
                 disabled={reportData.length === 0 || isFetching}
-                className="border-green-600 text-green-600 hover:bg-green-50"
+                className="border-green-600 text-green-600 "
               >
                 <Download className="h-4 w-4 mr-2" />
                 Excel
