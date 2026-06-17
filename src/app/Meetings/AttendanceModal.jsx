@@ -39,8 +39,8 @@ export default function AttendanceModal({ data, open, onClose, meetingId }) {
 
   const createInitialVisitorRow = () => ({
     guest_date: format(new Date(), "yyyy-MM-dd"),
-    guest_name: "",
-    guest_mobile: "",
+    guest_full_name: "",
+    guest_mobile_no: "",
     guest_type: "Visitor",
     guest_from_id: "",
     guest_description: "",
@@ -242,7 +242,7 @@ export default function AttendanceModal({ data, open, onClose, meetingId }) {
 
     // Simple validation
     for (let i = 0; i < visitorRows.length; i++) {
-      if (!visitorRows[i].guest_name) {
+      if (!visitorRows[i].guest_full_name) {
         toast.error(`Please enter a name for visitor #${i + 1}`);
         return;
       }
@@ -560,11 +560,11 @@ export default function AttendanceModal({ data, open, onClose, meetingId }) {
                       </Label>
                       <Input
                         placeholder="Guest Name"
-                        value={row.guest_name || ""}
+                        value={row.guest_full_name || ""}
                         onChange={(e) =>
                           handleChangeVisitorRow(
                             index,
-                            "guest_name",
+                            "guest_full_name",
                             e.target.value,
                           )
                         }
@@ -580,11 +580,11 @@ export default function AttendanceModal({ data, open, onClose, meetingId }) {
                       </Label>
                       <Input
                         placeholder="Mobile Number"
-                        value={row.guest_mobile || ""}
+                        value={row.guest_mobile_no || ""}
                         onChange={(e) =>
                           handleChangeVisitorRow(
                             index,
-                            "guest_mobile",
+                            "guest_mobile_no",
                             e.target.value,
                           )
                         }

@@ -85,10 +85,15 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
         if (data) {
           setFormData({
             guest_date: data.guest_date || format(new Date(), "yyyy-MM-dd"),
-            guest_name: data.guest_name || "",
-            guest_mobile: data.guest_mobile || "",
+            guest_full_name: data.guest_full_name || "",
+            guest_mobile_no: data.guest_mobile_no || "",
             guest_type: data.guest_type || "Visitor",
-            guest_from_id: (data.guest_from_id || data.guest_from?.id || data.from_id || "").toString(),
+            guest_from_id: (
+              data.guest_from_id ||
+              data.guest_from?.id ||
+              data.from_id ||
+              ""
+            ).toString(),
             guest_description: data.guest_description || "",
           });
         }
@@ -102,7 +107,7 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.guest_name) {
+    if (!formData.guest_full_name) {
       toast.error("Please enter guest name");
       return;
     }
@@ -119,7 +124,10 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
       });
 
       if (res?.code === 200 || res?.success || res?.status === 200) {
-        toast.success(res.message || `Record ${isEdit ? "updated" : "created"} successfully`);
+        toast.success(
+          res.message ||
+            `Record ${isEdit ? "updated" : "created"} successfully`,
+        );
         queryClient.invalidateQueries(["guest-list"]);
         onClose();
       } else {
@@ -134,31 +142,41 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Visitor/Guest" : "Add Visitor/Guest"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? "Edit Visitor/Guest" : "Add Visitor/Guest"}
+          </DialogTitle>
         </DialogHeader>
-        
-        <form 
-          onSubmit={handleSubmit} 
+
+        <form
+          onSubmit={handleSubmit}
           className="space-y-4 py-4 overflow-y-auto px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           <div className="space-y-2">
-            <Label htmlFor="guest_date">Date <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guest_date">
+              Date <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="guest_date"
               type="date"
               value={formData.guest_date}
-              onChange={(e) => setFormData({ ...formData, guest_date: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, guest_date: e.target.value })
+              }
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guest_name">Name <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guest_name">
+              Name <span className="text-red-500">*</span>
+            </Label>
             <Input
-              id="guest_name"
+              id="guest_full_name"
               placeholder="Guest Name"
-              value={formData.guest_name}
-              onChange={(e) => setFormData({ ...formData, guest_name: e.target.value })}
+              value={formData.guest_full_name}
+              onChange={(e) =>
+                setFormData({ ...formData, guest_full_name: e.target.value })
+              }
               required
             />
           </div>
@@ -168,16 +186,22 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
             <Input
               id="guest_mobile"
               placeholder="Mobile Number"
-              value={formData.guest_mobile}
-              onChange={(e) => setFormData({ ...formData, guest_mobile: e.target.value })}
+              value={formData.guest_mobile_no}
+              onChange={(e) =>
+                setFormData({ ...formData, guest_mobile_no: e.target.value })
+              }
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guest_type">Type <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guest_type">
+              Type <span className="text-red-500">*</span>
+            </Label>
             <Select
               value={formData.guest_type}
-              onValueChange={(value) => setFormData({ ...formData, guest_type: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, guest_type: value })
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select Type" />
@@ -190,15 +214,21 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guest_from_id">Member <span className="text-red-500">*</span></Label>
+            <Label htmlFor="guest_from_id">
+              Member <span className="text-red-500">*</span>
+            </Label>
             <Select
               key={`guest-member-${activeMembers.length}-${formData.guest_from_id}`}
               value={formData.guest_from_id}
-              onValueChange={(value) => setFormData({ ...formData, guest_from_id: value })}
+              onValueChange={(value) =>
+                setFormData({ ...formData, guest_from_id: value })
+              }
               disabled={membersLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder={membersLoading ? "Loading..." : "Select Member"} />
+                <SelectValue
+                  placeholder={membersLoading ? "Loading..." : "Select Member"}
+                />
               </SelectTrigger>
               <SelectContent>
                 {activeMembers.map((member) => (
@@ -216,13 +246,20 @@ const CreateGuestDialog = ({ open, onClose, id }) => {
               id="guest_description"
               placeholder="Enter details..."
               value={formData.guest_description}
-              onChange={(e) => setFormData({ ...formData, guest_description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, guest_description: e.target.value })
+              }
               rows={3}
             />
           </div>
 
           <DialogFooter className="pt-2 border-t">
-            <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || membersLoading}>

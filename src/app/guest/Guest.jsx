@@ -37,7 +37,12 @@ const Guest = () => {
   const queryClient = useQueryClient();
 
   // Fetch Guest List
-  const { data: listData, isLoading, isError, refetch } = useGetApiMutation({
+  const {
+    data: listData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetApiMutation({
     url: GUEST_API.list,
     queryKey: ["guest-list"],
   });
@@ -86,27 +91,30 @@ const Guest = () => {
     {
       header: "Date",
       accessorKey: "guest_date",
-      cell: ({ row }) => format(new Date(row.original.guest_date), "dd-MM-yyyy"),
+      cell: ({ row }) =>
+        format(new Date(row.original.guest_date), "dd-MM-yyyy"),
     },
     {
       header: "Name",
-      accessorKey: "guest_name",
-      cell: ({ row }) => row.original.guest_name || "-",
+      accessorKey: "guest_full_name",
+      cell: ({ row }) => row.original.guest_full_name || "-",
     },
     {
       header: "Number",
-      accessorKey: "guest_mobile",
-      cell: ({ row }) => row.original.guest_mobile || "-",
+      accessorKey: "guest_mobile_no",
+      cell: ({ row }) => row.original.guest_mobile_no || "-",
     },
     {
       header: "Type",
       accessorKey: "guest_type",
       cell: ({ row }) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-          row.original.guest_type === "Chief Guest" 
-            ? "bg-purple-100 text-purple-700" 
-            : "bg-blue-100 text-blue-700"
-        }`}>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium ${
+            row.original.guest_type === "Chief Guest"
+              ? "bg-purple-100 text-purple-700"
+              : "bg-blue-100 text-blue-700"
+          }`}
+        >
           {row.original.guest_type}
         </span>
       ),
@@ -120,7 +128,10 @@ const Guest = () => {
       header: "Description",
       accessorKey: "guest_description",
       cell: ({ row }) => (
-        <div className="max-w-[300px] truncate" title={row.original.guest_description}>
+        <div
+          className="max-w-[300px] truncate"
+          title={row.original.guest_description}
+        >
           {row.original.guest_description || "-"}
         </div>
       ),
