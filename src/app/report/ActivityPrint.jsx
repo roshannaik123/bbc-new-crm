@@ -24,7 +24,6 @@ const ActivityPrint = () => {
   const [reportData, setReportData] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
   const [isPTypesLoading, setIsPTypesLoading] = useState(false);
-  const [totalAttendance, setTotalAttendance] = useState(0);
   const { trigger: apiTrigger } = useApiMutation();
 
   useEffect(() => {
@@ -71,7 +70,6 @@ const ActivityPrint = () => {
 
       const data = res?.data || res || [];
       setReportData(Array.isArray(data) ? data : []);
-      setTotalAttendance(res?.totalattendanceCount);
       if (Array.isArray(data) && data.length === 0) {
         toast.info("No records found for the selected filters");
       }
@@ -90,37 +88,46 @@ const ActivityPrint = () => {
 
     const refReceived = reportData
       .filter((item) => Number(item.ref_received) > 0)
-      .map((item) => ({ name: item.name, amount: item.ref_received }));
+      .map((item) => ({ name: item.name, amount: item.ref_received }))
+      .sort((a, b) => b.amount - a.amount);
 
     const refGiven = reportData
       .filter((item) => Number(item.ref_given) > 0)
-      .map((item) => ({ name: item.name, amount: item.ref_given }));
+      .map((item) => ({ name: item.name, amount: item.ref_given }))
+      .sort((a, b) => b.amount - a.amount);
 
     const oneToOne = reportData
       .filter((item) => Number(item.onetoone_count) > 0)
-      .map((item) => ({ name: item.name, amount: item.onetoone_count }));
+      .map((item) => ({ name: item.name, amount: item.onetoone_count }))
+      .sort((a, b) => b.amount - a.amount);
 
     const teamPoints = reportData
       .filter((item) => Number(item.team_points) > 0)
-      .map((item) => ({ name: item.name, amount: item.team_points }));
+      .map((item) => ({ name: item.name, amount: item.team_points }))
+      .sort((a, b) => b.amount - a.amount);
 
     const visitors = reportData
       .filter((item) => Number(item.visitor_count) > 0)
-      .map((item) => ({ name: item.name, amount: item.visitor_count }));
+      .map((item) => ({ name: item.name, amount: item.visitor_count }))
+      .sort((a, b) => b.amount - a.amount);
 
     const newJoining = reportData
       .filter((item) => Number(item.newjoining_count) > 0)
-      .map((item) => ({ name: item.name, amount: item.newjoining_count }));
-
-    const total = totalAttendance;
+      .map((item) => ({ name: item.name, amount: item.newjoining_count }))
+      .sort((a, b) => b.amount - a.amount);
 
     reportData.forEach((item) => {
-      const percent = total ? (Number(item.attendance_count) / total) * 100 : 0;
+      const percent = Number(item.totalMeetingCount)
+        ? (Number(item.attendance_count) / Number(item.totalMeetingCount)) * 100
+        : 0;
       const obj = { name: item.name, count: item.attendance_count };
 
       if (percent >= 70) above70.push(obj);
       else if (percent >= 50) mid50to69.push(obj);
       else below50.push(obj);
+      above70.sort((a, b) => b.count - a.count);
+      mid50to69.sort((a, b) => b.count - a.count);
+      below50.sort((a, b) => b.count - a.count);
     });
 
     return {
@@ -513,7 +520,7 @@ const ActivityPrint = () => {
         {/* Attendance Area */}
         <div className="w-full max-w-none rounded-lg p-6 print:p-0 bg-white mt-8 print:mt-6">
           <h2 className="text-lg font-bold border-b border-black pb-3 mb-5">
-            Attendance - ( Meeting - {totalAttendance} )
+            Attendance
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 print:flex print:flex-wrap gap-8 print:gap-4 w-full">
