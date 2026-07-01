@@ -179,11 +179,12 @@ const Profile = () => {
         formDataObj.append(key, formData[key]);
       }
     });
+    formDataObj.append("_method", "PUT");
 
     try {
       const res = await updateProfile({
-        url: `${PROFILE.updateprofile}/${id}`,
-        method: "put",
+        url: `${PROFILE.updateprofile}/${id}`, // your endpoint
+        method: "post",
         data: formDataObj,
         headers: {
           "Content-Type": "multipart/form-data",
